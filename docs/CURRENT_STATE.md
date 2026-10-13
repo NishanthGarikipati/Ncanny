@@ -74,9 +74,9 @@ exist, feature incomplete · **Missing** = not started.
 | Preceptor profile (read/update, stats scaffold) | Done |
 | School entity + directory | Partial (entity, lookup, auto-provision on registration; no admin console) |
 | Subjects / topics | Partial (subject catalogue + seed; topics/subtopics missing) |
-| Content system (essay / elocution / painting / study activity) | Missing |
-| Academic feed | Missing |
-| Whiteboard 2D / 3D | Missing |
+| Content system (essay / elocution / painting / study activity) | Partial (create, view, school visibility, Preceptor mark; no edit, delete, comments or likes) |
+| Academic feed | Partial (school chronological feed; no ranking, trending or category chips) |
+| Whiteboard 2D / 3D | Partial (2D wall on web and mobile; web Three.js hall, capability-gated; no search, filters, realtime or Unity) |
 | Gamification (XP, levels, badges, ranks, leaderboards) | Missing (XP/level fields reserved on profiles) |
 | Real-time (Socket.io) | Missing |
 | Notifications | Missing |
@@ -85,7 +85,7 @@ exist, feature incomplete · **Missing** = not started.
 | Settings | Partial (theme + account shell on web) |
 | School subscription / payments | Missing |
 | Admin console | Missing |
-| Mobile app | Partial (Expo shell: attendance, registration, profile) |
+| Mobile app | Partial (attendance, registration, profile, writing, whiteboard; the hall is web-only) |
 
 ## 6. Technical risks
 
@@ -142,9 +142,19 @@ Deviations from the master phase list and why:
 - **Review loop before gamification** — XP and badges are derived from reviews; building the
   rewards before the thing being rewarded would produce throwaway work.
 
-## 10. What this milestone delivered
+## 10. What the foundation milestone delivered
 
-See `docs/IMPLEMENTATION_PLAN.md` (Epic 1–3) and the milestone report in the pull request. In
-short: monorepo foundation, API with authentication and RBAC, Scholar/Preceptor registration and
-sign-in, Canny ID, basic profiles, a shared design system, a responsive web shell and an Expo
-mobile shell, with unit, integration and e2e tests and a CI pipeline.
+See `docs/IMPLEMENTATION_PLAN.md` (Epic 1–3). In short: monorepo foundation, API with
+authentication and RBAC, Scholar/Preceptor registration and sign-in, Canny ID, basic profiles, a
+shared design system, a responsive web shell and an Expo mobile shell, with unit, integration and
+e2e tests and a CI pipeline.
+
+## 11. What the content and hall milestone delivered
+
+School-scoped works (essay, painting, elocution, study activity, teaching notes, teaching audio),
+local media with magic-byte checks, a Preceptor mark, reports that flag a piece, a 2D whiteboard
+on web and mobile, and a Three.js academic hall on the web. The hall reads the same works, opens
+the same reader, and shows opt-in nameplates. It does not add chat.
+
+Still absent, on purpose: S3, edit/delete, comments, likes, search filters, realtime updates,
+Unity, mobile 3D, XP and badges for publishing, and a moderation console.

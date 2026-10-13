@@ -30,6 +30,16 @@ export default function AuthenticatedLayout() {
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="settings" />
       <Stack.Screen
+        name="work/[id]"
+        options={{
+          headerShown: true,
+          title: 'Work',
+          headerStyle: { backgroundColor: colors.surface },
+          headerTintColor: colors.text,
+          headerTitleStyle: { color: colors.text },
+        }}
+      />
+      <Stack.Screen
         name="people/[cannyId]"
         options={{
           headerShown: true,

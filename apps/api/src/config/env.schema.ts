@@ -45,6 +45,12 @@ export const envSchema = z
       .default('true')
       .transform((value) => value === 'true'),
 
+    /**
+     * Directory for uploaded media. Local disk until object storage is attached.
+     * Production should set this to a persistent volume; it is not a secret.
+     */
+    MEDIA_ROOT: z.string().min(1).optional(),
+
     LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
     SWAGGER_ENABLED: z
       .enum(['true', 'false'])

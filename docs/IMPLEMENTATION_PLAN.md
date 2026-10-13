@@ -138,24 +138,26 @@ progress are visible.*
 
 ---
 
-## EPIC 4 — Content System (Phase 4) — next milestone
+## EPIC 4 — Content System (Phase 4) — in progress
 
-- F4.1 Media pipeline: `MediaAsset` model, S3 signed upload, MIME/size validation, thumbnails, virus-scan hook, signed read URLs. *Stories: upload with progress/retry/cancel; private media is not publicly addressable.*
-- F4.2 Generic `Content` model + per-type metadata (Essay, Elocution, Painting, Study Activity) with create/edit/delete/view, visibility and status.
-- F4.3 Create flow: choose activity → upload/compose → subject & topic → preview → visibility → submit.
-- F4.4 Engagement: comments, likes, peer feedback.
-- F4.5 Preceptor review: marks, feedback, badge award, with audit trail.
-- TEST focus: authorisation on every mutation, visibility enforcement, oversized/unsupported media rejection, delete leaves no orphaned media.
+- [x] F4.1 `media_assets` plus local disk storage (`MEDIA_ROOT`). Declared MIME is checked against magic bytes and size. Reads are authenticated base64, so a file is not a public URL. S3 signed upload, thumbnails, virus scan, and upload progress are not built (`DL-0015`).
+- [x] F4.2 `works` for essay, painting, elocution, study activity, teaching notes and teaching audio, with visibility and status. Create and view only. Edit and delete are not built.
+- [x] F4.3 Create flow on the web (kind, writing or file, subject, visibility, publish) and on mobile for writing. No separate preview step. Topics are not collected.
+- [ ] F4.4 Engagement: comments, likes, peer feedback.
+- [x] F4.5 Preceptor review: score and written feedback, audited. Badge award is not built. This is not AI grading.
+- [x] TEST: content e2e covers school visibility, private work hidden from a schoolmate, preceptor-only review, rejected image bytes, and hall presence that does not include an email.
 
-## EPIC 5 — Academic Feed (Phase 5)
-- F5.1 Chronological feed with cursor pagination and category filters (All / Essays / Elocution / Paintings / Study Activities / Subjects / Challenges / Achievements).
-- F5.2 Relevance ranking by subject, grade, school and follow graph, behind a configurable scorer.
-- F5.3 Trending, with anti-gaming safeguards.
+## EPIC 5 — Academic Feed (Phase 5) — partial
 
-## EPIC 6 — Whiteboard (Phase 6)
-- F6.1 2D Whiteboard: content wall, search, subject/type/user filters, sort, Preceptor review affordances.
-- F6.2 Real-time board updates.
-- F6.3 3D Whiteboard as progressive enhancement with an explicit 2D/3D toggle and automatic capability-based downgrade.
+- [x] F5.1 School-scoped chronological feed with cursor pagination. The API accepts `type` and `subjectId`. The UI shows the newest school work and does not offer category chips. Challenges and achievements are not in the feed.
+- [ ] F5.2 Relevance ranking by subject, grade, school and follow graph.
+- [ ] F5.3 Trending, with anti-gaming safeguards.
+
+## EPIC 6 — Whiteboard (Phase 6) — partial
+
+- [x] F6.1 2D whiteboard of school work on web and mobile. Opening a piece uses the same reader, including the Preceptor mark form. Search, subject filters and sort controls are not in the UI.
+- [ ] F6.2 Real-time board updates.
+- [x] F6.3 Three.js academic hall on the web, loaded only after "Enter the 3D hall". No WebGL stays on the whiteboard. `prefers-reduced-motion` uses orbit controls instead of pointer lock. Clicking a panel opens the same reader. There is no chat. Unity is not used (`DL-0005`, `DL-0016`). Mobile does not render the hall.
 
 ## EPIC 7 — Subject Network (Phase 7)
 - F7.1 Topics and subtopics · F7.2 Subject pages · F7.3 Following · F7.4 Global search with filters · F7.5 Recommendations.

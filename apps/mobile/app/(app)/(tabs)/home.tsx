@@ -1,7 +1,10 @@
-import { UserRole } from '@ncanny/types';
+import { UserRole, type WorkCard } from '@ncanny/types';
 import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
+import { WorkList } from '../../../src/components/WorkList';
 import { Button, Card, Muted, Screen } from '../../../src/components/ui';
+import { getApiClient } from '../../../src/lib/api';
 import { useAuthStore } from '../../../src/lib/auth-store';
 import { useTheme } from '../../../src/theme/theme';
 
@@ -9,6 +12,19 @@ export default function HomeScreen() {
   const router = useRouter();
   const colors = useTheme();
   const user = useAuthStore((state) => state.user);
+  const [works, setWorks] = useState<WorkCard[]>([]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    getApiClient()
+      .content.feed({ limit: 4 }, { signal: controller.signal })
+      .then((page) => setWorks(page.items))
+      .catch(() => {
+        if (!controller.signal.aborted) setWorks([]);
+      });
+    return () => controller.abort();
+  }, []);
+
   if (!user) return null;
 
   const scholar = user.role === UserRole.SCHOLAR;
@@ -34,16 +50,15 @@ export default function HomeScreen() {
         </Card>
       </View>
       <Card>
-        <Text style={{ color: colors.text, fontWeight: '700' }}>Your feed</Text>
+        <Text style={{ color: colors.text, fontWeight: '700' }}>Your school</Text>
         <Muted>
-          {scholar
-            ? 'Creating and sharing work arrives in the next milestone. Finish your profile so Preceptors can find you.'
-            : 'Scholar submissions arrive in the next milestone. Finish your profile so your Scholars can find you.'}
+          {works.length === 0
+            ? 'Nothing is published yet. Essays and study activities you write appear here and on the whiteboard.'
+            : 'Newest work from your school. The walkable hall is on the web app.'}
         </Muted>
-        <Button
-          label="Go to my profile"
-          onPress={() => router.push('/profile')}
-        />
+        {works.length > 0 ? <WorkList works={works} onOpen={(id) => router.push(`/work/${id}`)} /> : null}
+        <Button label="Open whiteboard" onPress={() => router.push('/explore')} />
+        <Button label="Go to my profile" variant="secondary" onPress={() => router.push('/profile')} />
       </Card>
       <Button label="Settings" variant="secondary" onPress={() => router.push('/settings')} />
     </Screen>
