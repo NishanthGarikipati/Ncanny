@@ -43,6 +43,15 @@ export default tseslint.config(
     },
   },
   {
+    // NestJS resolves injected dependencies from emitted decorator metadata,
+    // which requires a value import. Rewriting those to `import type` would
+    // silently break dependency injection at runtime.
+    files: ['apps/api/**/*.ts'],
+    rules: {
+      '@typescript-eslint/consistent-type-imports': 'off',
+    },
+  },
+  {
     files: ['**/*.test.ts', '**/*.test.tsx', '**/*.spec.ts', '**/*.e2e-spec.ts', '**/test/**'],
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
