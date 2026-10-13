@@ -27,7 +27,15 @@
       "@scarf/scarf",
       "mongodb-memory-server",
       "esbuild"
-    ]
+    ],
+    "packageExtensions": {
+      "next": {
+        "dependencies": {
+          "@types/react": "19.3.0",
+          "@types/react-dom": "19.3.0"
+        }
+      }
+    }
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",

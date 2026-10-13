@@ -16,9 +16,12 @@ import {
   Button,
   Card,
   CardHeader,
+  EmptyState,
   LoadingState,
   ProfileHeader,
   StatCard,
+  TabPanel,
+  Tabs,
 } from '@ncanny/ui';
 import { useCallback, useEffect, useState } from 'react';
 import { getApiClient } from '../../lib/api';
@@ -42,6 +45,7 @@ export function ProfileView({ cannyId }: { cannyId: string }) {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
+  const [contentTab, setContentTab] = useState('paintings');
 
   const isOwnProfile = viewer?.cannyId === cannyId;
 
@@ -183,7 +187,37 @@ export function ProfileView({ cannyId }: { cannyId: string }) {
       </Card>
 
       <Card>
-        <CardHeader title={scholar ? 'Work created' : 'Reviewing'} />
+        <CardHeader
+          title={scholar ? 'Work created' : 'Reviewing'}
+          description="Publishing work opens in the next milestone. These shelves stay empty until then."
+        />
+        <div className="mt-4">
+          <Tabs
+            aria-label="Work"
+            activeId={contentTab}
+            onChange={setContentTab}
+            items={[
+              { id: 'paintings', label: 'Paintings', count: scholar ? profile.contentStats.paintings : 0 },
+              { id: 'essays', label: 'Essays', count: scholar ? profile.contentStats.essays : 0 },
+              { id: 'elocution', label: 'Elocution', count: scholar ? profile.contentStats.elocutions : 0 },
+              {
+                id: 'study',
+                label: 'Study activities',
+                count: scholar ? profile.contentStats.studyActivities : 0,
+              },
+            ]}
+          />
+          <TabPanel id={contentTab} activeId={contentTab}>
+            <EmptyState
+              title={`No ${contentTab === 'study' ? 'study activities' : contentTab} yet`}
+              description={
+                scholar
+                  ? 'When you publish work it will appear on this shelf, visible according to the setting above.'
+                  : 'Reviews and uploaded teaching material will appear here once the content milestone ships.'
+              }
+            />
+          </TabPanel>
+        </div>
         <div className="mt-3 grid gap-3 sm:grid-cols-4">
           {scholar ? (
             <>

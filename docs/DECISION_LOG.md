@@ -176,3 +176,33 @@ tokens before public beta.
 mitigated by strict input validation, no raw HTML rendering and a restrictive CSP — but the
 cookie-based migration is a **pre-beta requirement**, tracked in `SECURITY.md`, not an optional
 improvement.
+
+---
+
+### DL-0013 — One React 19 type package for Next, React 18 types stay on mobile
+
+**Context.** Expo SDK 52 requires React 18, while the web app uses React 19. pnpm's virtual store
+hoisted `@types/react@18` where Next's declaration files look for types, so the web project saw
+two incompatible `ReactNode` definitions and failed to typecheck.
+
+**Decision.** `pnpm.packageExtensions` adds `@types/react@19.3.0` and `@types/react-dom@19.3.0` as
+dependencies of `next`, so Next resolves React 19 types from its own folder. Mobile keeps
+`@types/react@18`.
+
+**Consequences.** Web typecheck is stable across installs. Do not replace this with a root
+`overrides` entry that forces every workspace onto one `@types/react`: that would typecheck the
+Expo app against the wrong React generation.
+
+---
+
+### DL-0014 — Mobile tokens live in the platform secure store
+
+**Context.** DL-0012 keeps web tokens in `localStorage` until the httpOnly-cookie migration.
+A phone has a better store available.
+
+**Decision.** The Expo app writes the access token, refresh token and expiry as three separate
+secure-store items (`expo-secure-store`). They are split because a single value is capped at
+2 KB on iOS, and the pair together can exceed that.
+
+**Consequences.** A lost or rooted device is still a threat, but tokens are not in a readable
+preferences file. The web cookie migration does not change this mobile choice.
