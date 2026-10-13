@@ -1,0 +1,12 @@
+{
+  "extends": "@ncanny/config/tsconfig.react.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "noEmit": true,
+    "declarationMap": false,
+    "declaration": false,
+    "types": ["jest", "@testing-library/jest-dom"]
+  },
+  "include": ["src/**/*"]
+}

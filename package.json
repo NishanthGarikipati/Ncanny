@@ -1,0 +1,49 @@
+{
+  "name": "ncanny",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Ncanny — Academic Social Media & Learning Gaming Platform",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=20.11.0",
+    "pnpm": ">=9"
+  },
+  "packageManager": "pnpm@10.0.0",
+  "scripts": {
+    "build": "pnpm -r --filter \"./packages/**\" build && pnpm -r --filter \"./apps/**\" build",
+    "build:packages": "pnpm -r --filter \"./packages/**\" build",
+    "dev:api": "pnpm --filter @ncanny/api dev",
+    "dev:web": "pnpm --filter @ncanny/web dev",
+    "dev:mobile": "pnpm --filter @ncanny/mobile dev",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\""
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@nestjs/core",
+      "@scarf/scarf",
+      "mongodb-memory-server",
+      "esbuild"
+    ],
+    "packageExtensions": {
+      "next": {
+        "dependencies": {
+          "@types/react": "19.3.0",
+          "@types/react-dom": "19.3.0"
+        }
+      }
+    }
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "eslint": "^9.17.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.18.1"
+  }
+}
