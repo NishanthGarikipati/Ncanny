@@ -1,4 +1,5 @@
 import js from '@eslint/js';
+import reactHooks from 'eslint-plugin-react-hooks';
 import tseslint from 'typescript-eslint';
 import prettier from 'eslint-config-prettier';
 
@@ -49,6 +50,16 @@ export default tseslint.config(
     files: ['apps/api/**/*.ts'],
     rules: {
       '@typescript-eslint/consistent-type-imports': 'off',
+    },
+  },
+  {
+    // Stale closures and missing effect dependencies are the defect class most
+    // likely to show a Scholar someone else's data after a navigation.
+    files: ['**/*.tsx', '**/*.jsx'],
+    plugins: { 'react-hooks': reactHooks },
+    rules: {
+      ...reactHooks.configs.recommended.rules,
+      'react-hooks/exhaustive-deps': 'error',
     },
   },
   {
