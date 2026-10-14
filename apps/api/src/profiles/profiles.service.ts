@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import {
   AnalyticsEvent,
+  ContentType,
   ErrorCode,
   UserRole,
   type AccessTokenClaims,
@@ -378,5 +379,43 @@ export class ProfilesService {
         contentUploaded: profile.interactionStats.contentUploaded,
       },
     };
+  }
+
+  /** Counts a newly published Scholar work. Drafts and archives do not call this. */
+  async recordScholarPublication(userId: string, type: ContentType): Promise<void> {
+    const fieldByType: Partial<Record<ContentType, string>> = {
+      [ContentType.PAINTING]: 'contentStats.paintings',
+      [ContentType.ESSAY]: 'contentStats.essays',
+      [ContentType.ELOCUTION]: 'contentStats.elocutions',
+      [ContentType.STUDY_ACTIVITY]: 'contentStats.studyActivities',
+    };
+    const field = fieldByType[type];
+    if (!field) {
+      return;
+    }
+    await this.scholarModel.updateOne(
+      { userId: new Types.ObjectId(userId) },
+      { $inc: { [field]: 1, 'contentStats.total': 1 } },
+    );
+  }
+
+  async recordPreceptorPublication(userId: string): Promise<void> {
+    await this.preceptorModel.updateOne(
+      { userId: new Types.ObjectId(userId) },
+      { $inc: { 'interactionStats.contentUploaded': 1 } },
+    );
+  }
+
+  async recordPreceptorReview(userId: string): Promise<void> {
+    await this.preceptorModel.updateOne(
+      { userId: new Types.ObjectId(userId) },
+      {
+        $inc: {
+          'interactionStats.submissionsReviewed': 1,
+          'interactionStats.feedbackProvided': 1,
+          'interactionStats.marksProvided': 1,
+        },
+      },
+    );
   }
 }

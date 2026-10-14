@@ -2,7 +2,7 @@
 
 MongoDB, accessed through Mongoose. The schema files under `apps/api/src` are the source of
 truth; this document records the collections, the constraints that protect student data, and the
-indexes that exist in milestone 1.
+indexes that exist after the content milestone.
 
 Redis is not deployed. `CacheService` is an in-memory stand-in with the same interface a Redis
 implementation will satisfy (`DL-0007`).
@@ -19,6 +19,9 @@ implementation will satisfy (`DL-0007`).
 | `schools` | `apps/api/src/schools/school.schema.ts` | School directory and subscription scaffold |
 | `subjects` | `apps/api/src/subjects/subject.schema.ts` | Curriculum catalogue |
 | `audit_logs` | `apps/api/src/audit/audit-log.schema.ts` | Security-relevant events |
+| `works` | `apps/api/src/content/schemas/content.schema.ts` | Published and draft academic work |
+| `media_assets` | `apps/api/src/content/schemas/media-asset.schema.ts` | Image and audio metadata. Bytes live on disk |
+| `hall_presence` | `apps/api/src/content/schemas/hall-presence.schema.ts` | Opt-in hall nameplates |
 
 ## Constraints that matter
 
@@ -47,9 +50,18 @@ implementation will satisfy (`DL-0007`).
 - `schools`: `normalisedName` + city, text index on `name` for registration search.
 - `subjects`: unique `code`, `{ sortOrder, name }`.
 - `audit_logs`: `createdAt`, `{ actorId, createdAt }`.
+- `works`: `{ schoolId, status, createdAt }`, `{ authorUserId, createdAt }`.
+- `media_assets`: owner and storage key. The storage key is 32 hex characters and cannot leave
+  the media root.
+- `hall_presence`: unique `userId`. Contact fields are not stored.
+
+Media bytes are files under `MEDIA_ROOT` (or the OS temp directory). They are not in MongoDB.
+
+Publishing increments the matching profile content counter. The first Preceptor review increments
+submissions reviewed, feedback given and marks given. XP, badges and leaderboards stay at zero.
 
 ## What is deliberately not stored yet
 
-Content, media, comments, reviews, badges, notifications, messages and leaderboard snapshots
-arrive with their own epics. Stat fields on profiles exist and stay at zero until those epics
-write them.
+Comments, likes, badges, notifications, messages and leaderboard snapshots are not collections
+yet. Work has no edit or delete. A report sets `moderationStatus` to `FLAGGED` and does not
+open a queue.

@@ -1,10 +1,15 @@
-import { ComingSoon } from '../../../components/ComingSoon';
+import { Whiteboard } from '../../../components/content/Whiteboard';
 
 export default function ExplorePage() {
   return (
-    <ComingSoon
-      title="Explore is not open yet"
-      description="Subject networks, global search and discovery arrive with the content and search milestones. See docs/IMPLEMENTATION_PLAN.md, epics 5 and 11."
-    />
+    <div className="mx-auto flex max-w-5xl flex-col gap-4">
+      <header>
+        <h1 className="font-display text-2xl font-semibold text-content">Whiteboard</h1>
+        <p className="mt-1 text-sm text-content-muted">
+          Published work from your school. Open a piece here, or walk the same wall in the hall.
+        </p>
+      </header>
+      <Whiteboard />
+    </div>
   );
 }

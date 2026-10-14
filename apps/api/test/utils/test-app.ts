@@ -1,4 +1,5 @@
 import { INestApplication } from '@nestjs/common';
+import { json, urlencoded } from 'express';
 import { getConnectionToken } from '@nestjs/mongoose';
 import { Test } from '@nestjs/testing';
 import { MongoMemoryServer } from 'mongodb-memory-server';
@@ -50,7 +51,9 @@ export async function createTestHarness(options: HarnessOptions = {}): Promise<T
   AppLogger.configure('error', true);
 
   const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
-  const app = moduleRef.createNestApplication({ logger: false });
+  const app = moduleRef.createNestApplication({ logger: false, bodyParser: false });
+  app.use(json({ limit: '8mb' }));
+  app.use(urlencoded({ extended: true, limit: '8mb' }));
   app.setGlobalPrefix('api/v1');
   await app.init();
 

@@ -206,3 +206,52 @@ secure-store items (`expo-secure-store`). They are split because a single value 
 
 **Consequences.** A lost or rooted device is still a threat, but tokens are not in a readable
 preferences file. The web cookie migration does not change this mobile choice.
+
+---
+
+### DL-0015 — Media bytes on local disk until object storage exists
+
+**Context.** Content needs images and audio, and those files must not be publicly addressable.
+S3 and CloudFront are the planned store. They are not configured in this environment.
+
+**Decision.** `MediaStorage` writes files under `MEDIA_ROOT` (or the OS temp directory). The
+client uploads base64 JSON. The server sniffs magic bytes and rejects a type that does not match.
+Reads go through `GET /content/:id/media` and are wrapped in the normal auth envelope.
+
+**Consequences.** A single API process can serve the create loop and the tests. The files do not
+survive a new machine, and they are not suitable for more than one API instance. Replacing the
+storage class with signed S3 URLs does not change the content API shape the clients already call
+for metadata. Virus scanning and thumbnails remain outstanding.
+
+---
+
+### DL-0016 — The academic hall is Three.js, not Unity
+
+**Context.** The product vision includes a walkable 3D whiteboard. Unity WebGL is large, needs a
+separate build pipeline, and is a poor fit for the first functioning hall. DL-0005 already
+requires a complete 2D path.
+
+**Decision.** The web app dynamically imports a Three.js hall when the user chooses it. Panels
+show the same school works as the 2D whiteboard and open the same reader. Presence is an opt-in
+nameplate (name and Canny ID) with no chat. Reduced motion disables pointer-lock walking. Mobile
+stays on the 2D whiteboard.
+
+**Consequences.** The hall is a real, navigable scene tied to live data. It is not a Unity client,
+it does not sync movement over the network, and it is absent on phones. A later Unity build can
+sit beside this scene; it must not become the only way to read school work.
+
+---
+
+### DL-0017 — React Native libraries keep React 18 types
+
+**Context.** DL-0013 gives Next its own `@types/react@19`. Installing `@types/three` changed which
+copy pnpm hoists into `node_modules/.pnpm/node_modules`, so Expo libraries that do not depend on
+`@types/react` started resolving React 19 types. Their components then failed to typecheck inside
+the React 18 mobile app.
+
+**Decision.** `packageExtensions` also adds `@types/react@18.3.31` to `expo-router`,
+`react-native-safe-area-context`, `react-native-screens`, and the `@react-navigation` packages the
+app renders. There is still no workspace-wide override.
+
+**Consequences.** Mobile typecheck stays on React 18 types even when the hoisted copy is React 19.
+A new React Native library that ships JSX types may need the same extension.

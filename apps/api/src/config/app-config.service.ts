@@ -82,6 +82,10 @@ export class AppConfigService {
     return this.env.RATE_LIMIT_ENABLED;
   }
 
+  get mediaRoot(): string | undefined {
+    return this.env.MEDIA_ROOT;
+  }
+
   get logLevel(): Env['LOG_LEVEL'] {
     return this.env.LOG_LEVEL;
   }

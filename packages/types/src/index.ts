@@ -3,6 +3,7 @@ export * from './analytics';
 export * from './api';
 export * from './auth';
 export * from './content';
+export * from './work';
 export * from './errors';
 export * from './profile';
 export * from './roles';

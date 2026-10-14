@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { json, urlencoded } from 'express';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { AppLogger } from './common/logging/app-logger.service';
@@ -11,7 +12,11 @@ async function bootstrap(): Promise<void> {
   AppLogger.configure(config.logLevel);
 
   const logger = new AppLogger().setContext('Bootstrap');
-  const app = await NestFactory.create(AppModule, { logger, bufferLogs: false });
+  const app = await NestFactory.create(AppModule, { logger, bufferLogs: false, bodyParser: false });
+  // Paintings and elocution recordings travel as base64 JSON, which exceeds
+  // Express's default 100kb limit. The Zod schema still rejects oversized files.
+  app.use(json({ limit: '8mb' }));
+  app.use(urlencoded({ extended: true, limit: '8mb' }));
 
   app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
   app.enableCors({

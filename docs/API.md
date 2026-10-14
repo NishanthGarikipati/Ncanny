@@ -65,6 +65,25 @@ Contact fields (email, phone, password hash) are not present on profile response
 | GET | `/subjects` | Public | Active catalogue, ordered. |
 | GET | `/health` | Public | `{ status, database, uptimeSeconds }`. |
 
+## Work, media and the hall
+
+All of these routes require a bearer token. A hidden or missing piece of work is
+`404 CONTENT_NOT_FOUND`, including work from another school and work marked private.
+Responses never include the author's email, phone or internal user id.
+
+| Method | Path | Notes |
+| --- | --- | --- |
+| POST | `/media` | JSON body `{ mimeType, dataBase64 }`. Magic bytes must match the declared type. Images up to 4 MB, audio up to 8 MB. |
+| POST | `/content` | Publish an essay, painting, elocution, study activity, teaching notes or teaching audio. Role limits which types are allowed. |
+| GET | `/content` | School feed, newest first. Query: `limit`, `cursor`, optional `type`, optional `subjectId`. Only published work with visibility `SCHOOL` or `PUBLIC`. |
+| GET | `/content/mine` | Work created by the signed-in user, including private pieces. |
+| GET | `/content/:id` | One piece, if the viewer may see it. |
+| GET | `/content/:id/media` | `{ mimeType, dataBase64 }`. The file is not a public URL. |
+| POST | `/content/:id/review` | Preceptor or platform admin. Score 0–100 and feedback. Not an automated grade. Cannot mark your own work. |
+| POST | `/content/:id/report` | Flags the piece (`FLAGGED`). There is no moderation console yet. |
+| GET | `/whiteboard/hall` | At most 24 works and 12 opted-in schoolmates (name, Canny ID, role). No chat. |
+| POST | `/whiteboard/presence` | `{ optedIn }`. Opt-in presence for the hall. |
+
 ## Limits
 
 Auth routes are throttled more tightly than the global limit (10 requests/minute for sign-in

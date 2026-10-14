@@ -1,10 +1,16 @@
-import { ComingSoon } from '../../../components/ComingSoon';
+import { CreateWork } from '../../../components/content/CreateWork';
 
 export default function CreatePage() {
   return (
-    <ComingSoon
-      title="Creating work is not open yet"
-      description="Paintings, essays, elocutions and study activities arrive in the content milestone. See docs/IMPLEMENTATION_PLAN.md, epic 5."
-    />
+    <div className="mx-auto flex max-w-2xl flex-col gap-4">
+      <header>
+        <h1 className="font-display text-2xl font-semibold text-content">Create</h1>
+        <p className="mt-1 text-sm text-content-muted">
+          Publish an essay, painting, elocution or study activity for your school. A Preceptor marks
+          it by hand.
+        </p>
+      </header>
+      <CreateWork />
+    </div>
   );
 }

@@ -1,14 +1,5 @@
-import { Card, Muted, Screen } from '../../../src/components/ui';
+import { ActivityScreen } from '../../../src/screens/ActivityScreen';
 
-export default function ActivityScreen() {
-  return (
-    <Screen title="Activity">
-      <Card>
-        <Muted>
-          Reviews, notifications and challenge results appear here once content and the review
-          loop ship. No activity yet.
-        </Muted>
-      </Card>
-    </Screen>
-  );
+export default function ActivityTab() {
+  return <ActivityScreen />;
 }

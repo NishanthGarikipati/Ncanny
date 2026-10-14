@@ -15,6 +15,7 @@ import { HealthModule } from './health/health.module';
 import { IdentityModule } from './identity/identity.module';
 import { ProfilesModule } from './profiles/profiles.module';
 import { SchoolsModule } from './schools/schools.module';
+import { ContentModule } from './content/content.module';
 import { SubjectsModule } from './subjects/subjects.module';
 
 @Module({
@@ -37,6 +38,7 @@ import { SubjectsModule } from './subjects/subjects.module';
     SchoolsModule,
     SubjectsModule,
     ProfilesModule,
+    ContentModule,
     AuthModule,
     HealthModule,
   ],
