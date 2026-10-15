@@ -255,3 +255,19 @@ app renders. There is still no workspace-wide override.
 
 **Consequences.** Mobile typecheck stays on React 18 types even when the hoisted copy is React 19.
 A new React Native library that ships JSX types may need the same extension.
+
+---
+
+### DL-0018 — The campus is a game board, not a first-person room
+
+**Context.** The supplied concepts show a gaming academic social network: framed HUD panels,
+a character-sheet profile, and a whiteboard you play with classmates. A pointer-lock hall reads
+as a camera demo. The request was to rebuild the product so it feels like those images.
+
+**Decision.** The signed-in web app is a campus. Stations (Library, Studio, Stage, Laboratory,
+Faculty) filter the same school works. Clicking a plaque opens the reader. Classmates who opt in
+appear as name tokens. There is still no chat. Dark HUD styling is the default; light remains a
+setting. The first-person hall is no longer a navigation path.
+
+**Consequences.** 2D and the campus show the same works. WebGL is not required to play. Mobile
+keeps a station-filtered list of the same feed. Unity and proximity chat stay out.

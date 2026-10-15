@@ -76,7 +76,7 @@ exist, feature incomplete · **Missing** = not started.
 | Subjects / topics | Partial (subject catalogue + seed; topics/subtopics missing) |
 | Content system (essay / elocution / painting / study activity) | Partial (create, view, school visibility, Preceptor mark; no edit, delete, comments or likes) |
 | Academic feed | Partial (school chronological feed; no ranking, trending or category chips) |
-| Whiteboard 2D / 3D | Partial (2D wall on web and mobile; web Three.js hall, capability-gated; no search, filters, realtime or Unity) |
+| Whiteboard 2D / 3D | Partial (web campus board and mobile station chips over the same school works; no search, realtime, chat, or Unity. The pointer-lock hall is not linked) |
 | Gamification (XP, levels, badges, ranks, leaderboards) | Missing (XP/level fields reserved on profiles) |
 | Real-time (Socket.io) | Missing |
 | Notifications | Missing |

@@ -37,14 +37,14 @@ export default function LandingPage() {
       </header>
 
       <main className="mx-auto max-w-5xl px-4 pb-20 sm:px-6">
-        <section className="py-12 sm:py-20">
-          <p className="font-medium text-primary">Academic social platform</p>
+        <section className="hud-frame px-6 py-12 sm:px-10 sm:py-16">
+          <p className="kicker">Academic social game</p>
           <h1 className="mt-3 max-w-3xl font-display text-4xl font-bold leading-tight text-content sm:text-5xl">
-            Where school work becomes something worth sharing.
+            A campus where school work is the game.
           </h1>
           <p className="mt-5 max-w-2xl text-lg text-content-muted">
-            Ncanny gives every Scholar a permanent academic identity, a place to publish real work,
-            and Preceptors who review it properly. Built for schools, safe by default.
+            Scholars publish essays, paintings, elocutions and study activities. Classmates open them
+            on the campus. Preceptors mark them. Your Canny ID is the character you keep.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
@@ -62,6 +62,21 @@ export default function LandingPage() {
           </div>
         </section>
 
+        <section aria-label="Campus stations" className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            ['Library', 'Essays your school published'],
+            ['Studio', 'Paintings on the wall'],
+            ['Stage', 'Elocution you can play'],
+            ['Laboratory', 'Study activities'],
+          ].map(([name, detail]) => (
+            <div key={name} className="rounded-2xl border border-border bg-surface-raised/80 p-4">
+              <p className="kicker">Station</p>
+              <h2 className="mt-1 font-display text-lg font-semibold text-content">{name}</h2>
+              <p className="mt-1 text-sm text-content-muted">{detail}</p>
+            </div>
+          ))}
+        </section>
+
         <section aria-labelledby="loop-heading" className="py-6">
           <h2 id="loop-heading" className="font-display text-2xl font-semibold text-content">
             The Ncanny loop
@@ -72,10 +87,8 @@ export default function LandingPage() {
           <ol className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {LOOP.map((entry, index) => (
               <li key={entry.step}>
-                <Card className="h-full">
-                  <p className="text-sm font-semibold text-primary">
-                    {String(index + 1).padStart(2, '0')}
-                  </p>
+                <Card className="h-full" tone="hud">
+                  <p className="kicker">{String(index + 1).padStart(2, '0')}</p>
                   <h3 className="mt-1 font-display text-lg font-semibold text-content">
                     {entry.step}
                   </h3>

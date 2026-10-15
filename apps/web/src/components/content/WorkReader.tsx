@@ -71,13 +71,13 @@ export function WorkReader({ work, onClose }: { work: WorkDetail; onClose?: () =
   };
 
   return (
-    <article className="flex flex-col gap-3">
+    <article className="hud-frame flex flex-col gap-4 p-5 sm:p-6">
       <header className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-sm font-medium text-primary">{current.subjectName}</p>
-          <h2 className="font-display text-xl font-semibold text-content">{current.title}</h2>
+          <p className="kicker">{current.type.replaceAll('_', ' ')}</p>
+          <h2 className="mt-1 font-display text-2xl font-semibold text-content">{current.title}</h2>
           <p className="text-sm text-content-muted">
-            {current.authorName} · {current.authorCannyId}
+            {current.authorName} · {current.authorCannyId} · {current.subjectName}
           </p>
         </div>
         {onClose && (
@@ -94,11 +94,20 @@ export function WorkReader({ work, onClose }: { work: WorkDetail; onClose?: () =
 
       {mediaUrl && current.mediaKind === 'IMAGE' && (
         // The bytes were fetched with the viewer's token; a plain img URL would skip that check.
-        <img src={mediaUrl} alt={current.title} className="max-h-80 w-full rounded-md object-contain" />
+        <div className="stage">
+          <p className="kicker">Studio</p>
+          <img src={mediaUrl} alt={current.title} className="mt-3 max-h-96 w-full rounded-lg object-contain" />
+        </div>
       )}
-      {mediaUrl && current.mediaKind === 'AUDIO' && <audio controls src={mediaUrl} className="w-full" />}
+      {mediaUrl && current.mediaKind === 'AUDIO' && (
+        <div className="stage">
+          <p className="kicker">Elocution</p>
+          <p className="mt-1 text-sm text-content-muted">Play the recording. A transcript, when the author wrote one, is below.</p>
+          <audio controls src={mediaUrl} className="mt-3 w-full" />
+        </div>
+      )}
 
-      {current.body && <p className="whitespace-pre-wrap text-sm text-content">{current.body}</p>}
+      {current.body && <div className="reading-well whitespace-pre-wrap text-content">{current.body}</div>}
       {current.summary && !current.body && <p className="text-sm text-content">{current.summary}</p>}
 
       {current.review && (

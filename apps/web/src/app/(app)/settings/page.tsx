@@ -43,7 +43,10 @@ export default function SettingsPage() {
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6">
-      <h1 className="font-display text-2xl font-semibold text-content">Settings</h1>
+      <header>
+        <p className="kicker">Base</p>
+        <h1 className="mt-1 font-display text-3xl font-semibold text-content">Settings</h1>
+      </header>
 
       <Card>
         <CardHeader title="Account" />

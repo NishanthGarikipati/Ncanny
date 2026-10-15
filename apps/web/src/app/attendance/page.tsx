@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function AttendancePage() {
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-4 py-12">
-      <div className="mb-6">
+      <div className="hud-frame mb-6 p-5">
         <Link
           href="/"
           className="text-sm text-content-muted hover:text-content focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
@@ -19,11 +19,12 @@ export default function AttendancePage() {
         </Link>
         <h1 className="mt-2 font-display text-2xl font-semibold text-content">Mark attendance</h1>
         <p className="mt-1 text-sm text-content-muted">
-          Signing in records your attendance streak for the day.
+          Signing in records your attendance streak for the day. Then the campus opens.
         </p>
+        <div className="mt-5">
+          <AttendanceForm />
+        </div>
       </div>
-
-      <AttendanceForm />
 
       <p className="mt-6 text-center text-sm text-content-muted">
         New to Ncanny?{' '}

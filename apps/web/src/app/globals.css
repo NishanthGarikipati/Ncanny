@@ -22,11 +22,107 @@
 
   body {
     @apply bg-surface text-content antialiased;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 10% -10%, rgb(var(--ncanny-primary) / 0.18), transparent 50%),
+      radial-gradient(ellipse 60% 40% at 100% 0%, rgb(var(--ncanny-accent) / 0.14), transparent 46%),
+      linear-gradient(180deg, rgb(var(--ncanny-surface-sunken)), rgb(var(--ncanny-surface)) 32%);
+    background-attachment: fixed;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(rgb(var(--ncanny-primary) / 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(var(--ncanny-primary) / 0.05) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse at 50% 0%, black 10%, transparent 72%);
   }
 
   /* A visible focus ring is non-negotiable: many Scholars navigate by keyboard. */
   :focus-visible {
     @apply outline-none;
+  }
+
+  .hud-frame {
+    position: relative;
+    border: 1px solid rgb(var(--ncanny-border-strong));
+    background: rgb(var(--ncanny-surface-raised) / 0.88);
+    border-radius: 1.25rem;
+    box-shadow: 0 0 0 1px rgb(var(--ncanny-primary) / 0.08), 0 18px 40px -24px rgb(2 6 16 / 0.7);
+  }
+
+  .hud-frame::before,
+  .hud-frame::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    pointer-events: none;
+    border-color: rgb(var(--ncanny-primary));
+  }
+
+  .hud-frame::before {
+    top: 10px;
+    left: 10px;
+    border-top: 2px solid;
+    border-left: 2px solid;
+  }
+
+  .hud-frame::after {
+    right: 10px;
+    bottom: 10px;
+    border-right: 2px solid;
+    border-bottom: 2px solid;
+  }
+
+  .kicker {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgb(var(--ncanny-primary));
+  }
+
+  .reading-well {
+    border-radius: 0.9rem;
+    background: rgb(var(--ncanny-surface-sunken));
+    padding: 1rem 1.1rem;
+    font-size: 1rem;
+    line-height: 1.65;
+  }
+
+  .stage {
+    border-radius: 1rem;
+    border: 1px solid rgb(var(--ncanny-border-strong));
+    background:
+      radial-gradient(ellipse at 50% 120%, rgb(var(--ncanny-accent) / 0.2), transparent 55%),
+      rgb(var(--ncanny-surface-sunken));
+    padding: 1rem;
+  }
+
+  .campus-map {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  @media (min-width: 1024px) {
+    .campus-map {
+      grid-template-columns: minmax(0, 1fr) minmax(16rem, 1.35fr) minmax(0, 1fr);
+      grid-template-areas:
+        'library quad studio'
+        'stage quad laboratory'
+        'faculty faculty faculty';
+    }
+
+    .station-library { grid-area: library; }
+    .station-quad { grid-area: quad; }
+    .station-studio { grid-area: studio; }
+    .station-stage { grid-area: stage; }
+    .station-laboratory { grid-area: laboratory; }
+    .station-faculty { grid-area: faculty; }
   }
 
   @media (prefers-reduced-motion: reduce) {

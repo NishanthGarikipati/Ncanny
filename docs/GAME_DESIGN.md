@@ -64,10 +64,15 @@ Per-source daily XP caps · diminishing returns on repeated identical actions ·
 · self-interaction excluded from every signal · reciprocal like-rings detectable and discountable ·
 all awards audit-logged so anomalies can be investigated and reversed.
 
-## 6. The 3D layer
+## 6. The campus layer
 
-The 3D world is the **exploration** face of the same data; it introduces no mechanic that does not
-exist in 2D.
+The shipped exploration face is the **campus board** (`DL-0018`): stations filter the same school
+works, plaques open the reader, and opted-in classmates appear as name tokens. It introduces no
+mechanic that the feed does not already have, and it does not require WebGL. A pointer-lock hall
+is not part of navigation.
+
+A later walkable scene, if it returns, stays an enhancement of this board. It introduces no
+mechanic that does not exist in 2D.
 
 - **Spaces.** A virtual academic hall whose walls carry the Whiteboard content, subject zones,
   achievement displays and (where enabled) other users' avatars.

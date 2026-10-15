@@ -157,7 +157,7 @@ progress are visible.*
 
 - [x] F6.1 2D whiteboard of school work on web and mobile. Opening a piece uses the same reader, including the Preceptor mark form. Search, subject filters and sort controls are not in the UI.
 - [ ] F6.2 Real-time board updates.
-- [x] F6.3 Three.js academic hall on the web, loaded only after "Enter the 3D hall". No WebGL stays on the whiteboard. `prefers-reduced-motion` uses orbit controls instead of pointer lock. Clicking a panel opens the same reader. There is no chat. Unity is not used (`DL-0005`, `DL-0016`). Mobile does not render the hall.
+- [x] F6.3 Campus game board is the way you play with school work (`DL-0018`). Stations filter the same works, plaques open the reader, and opted-in classmates are name tokens. There is no chat and no WebGL requirement. The earlier Three.js pointer-lock hall remains in the repo and is not linked from navigation. Unity is not used. Mobile uses station chips on the same feed.
 
 ## EPIC 7 — Subject Network (Phase 7)
 - F7.1 Topics and subtopics · F7.2 Subject pages · F7.3 Following · F7.4 Global search with filters · F7.5 Recommendations.
