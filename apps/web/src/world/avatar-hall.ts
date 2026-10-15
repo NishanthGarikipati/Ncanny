@@ -1,6 +1,7 @@
 import { UserRole, type HallPresence, type WorkCard } from '@ncanny/types';
 import * as THREE from 'three';
 import { layoutHangingCards } from './hanging-layout';
+import { createHumanFigure, type HumanFigure } from './human-figure';
 
 export interface AvatarIdentity {
   fullName: string;
@@ -56,25 +57,35 @@ export function mountAvatarHall(container: HTMLElement, options: AvatarHallOptio
 
   buildRoom(scene);
 
-  const avatar = makePerson(options.viewer.role === UserRole.PRECEPTOR ? 0xf472b6 : 0x3ec8e8);
+  const viewerFigure = createHumanFigure({
+    cloth: options.viewer.role === UserRole.PRECEPTOR ? 0xf472b6 : 0x3ec8e8,
+    hair: 0x2a211c,
+    phase: 0,
+  });
+  const avatar = viewerFigure.root;
   avatar.position.set(0, 0, 3.2);
   avatar.rotation.y = Math.PI;
   scene.add(avatar);
   const youLabel = labelSprite(`You · ${options.viewer.cannyId ?? options.viewer.fullName}`);
-  youLabel.sprite.position.y = 2.15;
+  youLabel.sprite.position.y = 1.95;
   avatar.add(youLabel.sprite);
 
-  const classmates: THREE.Object3D[] = [];
+  const hairColors = [0x1c1410, 0x4a3428, 0x2c1810, 0x3a2a22];
+  const classmates: HumanFigure[] = [];
   options.presence.forEach((person, index) => {
-    const figure = makePerson(person.role === UserRole.PRECEPTOR ? 0xf472b6 : 0x67e8f9);
+    const figure = createHumanFigure({
+      cloth: person.role === UserRole.PRECEPTOR ? 0xf472b6 : 0x67e8f9,
+      hair: hairColors[index % hairColors.length] ?? 0x2a211c,
+      phase: index + 1.3,
+    });
     const side = index % 2 === 0 ? -1 : 1;
     const rank = Math.floor(index / 2);
-    figure.position.set(side * (2.4 + rank * 1.5), 0, 1.4 - rank * 0.6);
-    figure.lookAt(0, 1, -4);
+    figure.root.position.set(side * (2.4 + rank * 1.5), 0, 1.4 - rank * 0.6);
+    figure.root.lookAt(0, 1, -4);
     const label = labelSprite(`${person.fullName} · ${person.cannyId}`);
-    label.sprite.position.y = 2.15;
-    figure.add(label.sprite);
-    scene.add(figure);
+    label.sprite.position.y = 1.95;
+    figure.root.add(label.sprite);
+    scene.add(figure.root);
     classmates.push(figure);
   });
 
@@ -132,7 +143,9 @@ export function mountAvatarHall(container: HTMLElement, options: AvatarHallOptio
     });
   };
 
+  let greetUntil = 0;
   const markSelected = (workId: string | null) => {
+    if (workId && workId !== selectedId) greetUntil = performance.now() + 1800;
     selectedId = workId;
     for (const card of cards) {
       const frame = card.children[0] as THREE.Mesh;
@@ -155,6 +168,7 @@ export function mountAvatarHall(container: HTMLElement, options: AvatarHallOptio
   const offset = new THREE.Vector3();
   const move = new THREE.Vector3();
   const toward = new THREE.Vector3();
+  const face = new THREE.Vector3();
   const floor = scene.getObjectByName('hall-floor');
 
   let dragX = 0;
@@ -192,6 +206,11 @@ export function mountAvatarHall(container: HTMLElement, options: AvatarHallOptio
       options.onAct(workId, isHallAction(action) ? action : 'open');
       return;
     }
+    const personHit = raycaster.intersectObjects([avatar, ...classmates.map((person) => person.root)], true)[0];
+    if (personHit) {
+      greetUntil = performance.now() + 1800;
+      return;
+    }
     if (options.reducedMotion || !floor) return;
     const floorHit = raycaster.intersectObject(floor, false)[0];
     if (floorHit) {
@@ -219,6 +238,7 @@ export function mountAvatarHall(container: HTMLElement, options: AvatarHallOptio
   let frame = 0;
   const render = () => {
     const delta = Math.min(clock.getDelta(), 0.05);
+    let walking = false;
     if (!options.reducedMotion) {
       camera.getWorldDirection(forward);
       forward.y = 0;
@@ -230,6 +250,7 @@ export function mountAvatarHall(container: HTMLElement, options: AvatarHallOptio
       if (keys.has('KeyD') || keys.has('ArrowRight')) move.add(right);
       if (keys.has('KeyA') || keys.has('ArrowLeft')) move.sub(right);
       if (move.lengthSq() > 0) {
+        walking = true;
         move.normalize().multiplyScalar(delta * 4.2);
         avatar.position.add(move);
         avatar.rotation.y = Math.atan2(move.x, move.z);
@@ -239,9 +260,18 @@ export function mountAvatarHall(container: HTMLElement, options: AvatarHallOptio
         if (toward.length() < 0.2) {
           hasTarget = false;
         } else {
+          walking = true;
           toward.normalize().multiplyScalar(delta * 4.2);
           avatar.position.add(toward);
           avatar.rotation.y = Math.atan2(toward.x, toward.z);
+        }
+      } else if (selectedId) {
+        const card = cards.find((entry) => entry.userData.workId === selectedId);
+        if (card) {
+          face.set(card.position.x - avatar.position.x, 0, card.position.z - avatar.position.z);
+          if (face.lengthSq() > 0.01) {
+            avatar.rotation.y = dampAngle(avatar.rotation.y, Math.atan2(face.x, face.z), delta);
+          }
         }
       }
       avatar.position.x = clamp(avatar.position.x, ROOM.minX, ROOM.maxX);
@@ -252,6 +282,10 @@ export function mountAvatarHall(container: HTMLElement, options: AvatarHallOptio
         card.lookAt(camera.position.x, card.position.y, camera.position.z);
       });
     }
+    viewerFigure.setMoving(walking);
+    viewerFigure.setGreeting(!options.reducedMotion && performance.now() < greetUntil);
+    viewerFigure.update(clock.elapsedTime, options.reducedMotion);
+    for (const person of classmates) person.update(clock.elapsedTime, options.reducedMotion);
     offset.set(Math.sin(yaw) * 6.4, 3.15, Math.cos(yaw) * 6.4);
     camera.position.copy(avatar.position).add(offset);
     lookAt.set(avatar.position.x, 1.3, avatar.position.z);
@@ -409,28 +443,11 @@ function floorTexture(): THREE.CanvasTexture {
   return texture;
 }
 
-function makePerson(color: number): THREE.Group {
-  const group = new THREE.Group();
-  const cloth = new THREE.MeshStandardMaterial({ color, roughness: 0.4 });
-  const dark = new THREE.MeshStandardMaterial({ color: 0x1b2438, roughness: 0.6 });
-  const skin = new THREE.MeshStandardMaterial({ color: 0xf0c7a2, roughness: 0.55 });
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.22, 16, 12), skin);
-  head.position.y = 1.62;
-  const hair = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 10), dark);
-  hair.position.y = 1.72;
-  hair.scale.set(1.05, 0.7, 1.05);
-  const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.24, 0.46, 4, 8), cloth);
-  torso.position.y = 1.08;
-  const armL = new THREE.Mesh(new THREE.CapsuleGeometry(0.07, 0.34, 3, 6), cloth);
-  armL.position.set(-0.34, 1.08, 0);
-  const armR = armL.clone();
-  armR.position.x = 0.34;
-  const legL = new THREE.Mesh(new THREE.CapsuleGeometry(0.08, 0.36, 3, 6), dark);
-  legL.position.set(-0.1, 0.36, 0);
-  const legR = legL.clone();
-  legR.position.x = 0.1;
-  group.add(head, hair, torso, armL, armR, legL, legR);
-  return group;
+function dampAngle(current: number, target: number, delta: number): number {
+  let difference = target - current;
+  while (difference > Math.PI) difference -= Math.PI * 2;
+  while (difference < -Math.PI) difference += Math.PI * 2;
+  return current + difference * Math.min(1, delta * 4);
 }
 
 function addOrb(group: THREE.Group, workId: string, action: HallAction, y: number, color: number, text: string): void {
