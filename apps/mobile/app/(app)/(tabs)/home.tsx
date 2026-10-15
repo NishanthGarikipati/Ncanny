@@ -54,10 +54,10 @@ export default function HomeScreen() {
         <Muted>
           {works.length === 0
             ? 'Nothing is published yet. Essays and study activities you write appear here and on the whiteboard.'
-            : 'Newest work from your school. The walkable hall is on the web app.'}
+            : 'Newest work from your school. Open the campus to play a station.'}
         </Muted>
         {works.length > 0 ? <WorkList works={works} onOpen={(id) => router.push(`/work/${id}`)} /> : null}
-        <Button label="Open whiteboard" onPress={() => router.push('/explore')} />
+        <Button label="Open campus" onPress={() => router.push('/explore')} />
         <Button label="Go to my profile" variant="secondary" onPress={() => router.push('/profile')} />
       </Card>
       <Button label="Settings" variant="secondary" onPress={() => router.push('/settings')} />

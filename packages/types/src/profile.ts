@@ -3,6 +3,19 @@ import type { Visibility } from './content';
 import type { UserRole, UserStatus } from './roles';
 import type { SchoolSummary } from './school';
 
+/** Geometric marks a person can wear. These are icons, not generated portraits. */
+export const AvatarPreset = {
+  CREST: 'crest',
+  BOOK: 'book',
+  QUILL: 'quill',
+  LANTERN: 'lantern',
+  COMPASS: 'compass',
+} as const;
+
+export type AvatarPreset = (typeof AvatarPreset)[keyof typeof AvatarPreset];
+
+export const AVATAR_PRESETS: readonly AvatarPreset[] = Object.values(AvatarPreset);
+
 /** Gamification figures shown on a profile. Populated from Epic 8 onwards. */
 export interface ProgressionStats {
   xp: number;
@@ -38,6 +51,7 @@ export interface ProfileIdentity {
   role: UserRole;
   fullName: string;
   avatarUrl?: string;
+  avatarPreset?: AvatarPreset;
   bio?: string;
   school: SchoolSummary;
   visibility: Visibility;
@@ -82,6 +96,7 @@ export interface CurrentUser {
   phone?: string;
   fullName: string;
   avatarUrl?: string;
+  avatarPreset?: AvatarPreset;
   schoolId: string | null;
   emailVerified: boolean;
   phoneVerified: boolean;

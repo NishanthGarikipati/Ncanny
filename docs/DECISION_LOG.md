@@ -255,3 +255,94 @@ app renders. There is still no workspace-wide override.
 
 **Consequences.** Mobile typecheck stays on React 18 types even when the hoisted copy is React 19.
 A new React Native library that ships JSX types may need the same extension.
+
+---
+
+### DL-0018 — The campus is a game board, not a first-person room
+
+**Context.** The supplied concepts show a gaming academic social network: framed HUD panels,
+a character-sheet profile, and a whiteboard you play with classmates. A pointer-lock hall reads
+as a camera demo. The request was to rebuild the product so it feels like those images.
+
+**Decision.** The signed-in web app is a campus. Stations (Library, Studio, Stage, Laboratory,
+Faculty) filter the same school works. Clicking a plaque opens the reader. Classmates who opt in
+appear as name tokens. There is still no chat. Dark HUD styling is the default; light remains a
+setting. The first-person hall is no longer a navigation path.
+
+**Consequences.** 2D and the campus show the same works. WebGL is not required to play. Mobile
+keeps a station-filtered list of the same feed. Unity and proximity chat stay out.
+
+---
+
+### DL-0019 — Neon console chrome follows the supplied references
+
+**Context.** The supplied screens are cyan-and-magenta consoles: a portrait plate and Canny ID
+banner, pill tabs for Paintings / Essays / Elocution / Study Activities, an essay card with the
+author beside the writing, an elocution stage, a registration role choice, and a whiteboard of
+hanging cards. The first campus pass was too close to a plain dashboard.
+
+**Decision.** Dark surfaces move to the reference navy, and those screens use the bezel, portrait
+slot, pill tabs, and hanging cards. Likes, comments, billing, 2FA, and a generated 3D avatar are
+not drawn as if they work. Home address stays off the profile. A Preceptor mark is shown as stars.
+
+**Consequences.** The product looks like the references where a real action exists. Empty badges
+stay empty. Light theme remains available.
+
+---
+
+### DL-0020 — Reference actions are real, and only on work the viewer can see
+
+**Context.** DL-0019 matched the neon console and left likes, comments and badges undrawn so they
+would not look finished. The colour was accepted. The missing pieces were the interactions on
+those screens.
+
+**Decision.** A person who can see a school work can like it, smile at it, comment on it (500
+characters), bookmark it, and report a comment. A Preceptor can award shield, star or medal once,
+and cannot award their own work. Counts live on the work. A person's own reaction is stored so
+the button matches, and it is not used as a rank signal. The school page lists the viewer's own
+school: institutional address, classmates who are school-visible, the gallery, and published
+counts. Password change checks the current password and signs out other devices. Avatar choices
+are five geometric marks, not generated faces. Billing, 2FA, language packs and a sign-in role
+switch are not presented as working controls.
+
+**Consequences.** Comments are notes on a visible work, not private messages. Hidden work returns
+the same not-found response as a missing work. Student email, phone and home address stay off
+the school page and the profile.
+
+---
+
+### DL-0021 — The blackboard is a hall of interactive cards
+
+**Context.** DL-0018 replaced the pointer-lock room with a flat campus list. The later references
+show a hall: work hangs in front of a class, and like, comment, badge and rank sit on the cards.
+A first-person walk was already rejected.
+
+**Decision.** The blackboard page draws that hall in the page itself. Cards keep the real like,
+comment, badge and rank actions. Choosing one opens the piece, including audio, on the same page.
+Opted-in classmates stand on the ring as name and Canny ID. Filters only change which cards hang.
+There is still no chat, and the page does not require WebGL. Reduced motion already stops animation.
+
+**Consequences.** The earlier Three.js hall stays unlinked. Mobile keeps a list of the same feed.
+Rank on a card is the Preceptor's mark, not a calculated leaderboard.
+
+---
+
+### DL-0022 — The walking hall is a third-person avatar, and it is not a Unity build
+
+**Context.** The hall references show a person walking among hanging work and using like, comment,
+badge and rank. The request was to build that in Unity so the avatar interaction would match.
+This environment has no Unity Editor and no Unity license, so a Unity player cannot be compiled
+or embedded.
+
+**Decision.** When the browser can draw WebGL, the blackboard opens on a third-person avatar.
+The camera stays behind that figure. W A S D, the arrow keys, the on-screen pad, and a click on
+the floor move it. Dragging looks around. Pointer lock is not used. Each hanging card has
+like, comment, badge and rank marks. Those marks call the same actions as the flat board, and a
+click on the card opens the piece. The flat board remains one
+control away, and it is the only board when WebGL is missing. Reduced motion disables walking and
+camera movement; a click still opens a card. Classmates who opted in are simple figures labelled
+with name and Canny ID. There is no chat.
+
+**Consequences.** This is the browser runtime already in the web app, not a Unity WebGL player.
+A later Unity build can replace the scene only if it keeps the 2D board and the same actions.
+The earlier pointer-lock hall stays unlinked.

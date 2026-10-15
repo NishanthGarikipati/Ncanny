@@ -11,8 +11,8 @@ triples. The web app writes them to CSS variables (`paletteToCssVariables`) and 
 semantic names (`bg-surface`, `text-content`, `bg-primary`) through
 `packages/config/tailwind.preset.js`. Mobile calls `channelColor` on the same triples.
 
-Light is the default. It is the more readable option on the low-cost screens many Scholars use.
-Dark follows the system setting on both clients and can be switched explicitly on the web.
+Dark is the default on the web so the campus HUD matches the concept direction (`DL-0018`).
+Light remains a first-class theme and can be switched explicitly. It is the more readable option on many student screens.
 
 Neon is an accent (`accent`, `shadow-hud`), not the colour of resting surfaces.
 
@@ -45,10 +45,9 @@ depend on a router.
 
 ## Navigation
 
-Signed-in web and mobile shells use the same five destinations: Home, Explore, Create, Activity,
-Profile. On the web, Create is the prominent centre action of the bottom bar below the `lg`
-breakpoint and a rail item above it. Explore, Create and Activity explain that their features
-ship in a later milestone rather than presenting an empty feed as if it were broken.
+Signed-in web navigation is Lobby, Campus, Create, Quests, and Character. Mobile keeps Home,
+Explore, Create, Activity, and Profile. Create publishes school work. Campus and Explore show
+the same school feed, filtered by station.
 
 ## Not in this milestone
 

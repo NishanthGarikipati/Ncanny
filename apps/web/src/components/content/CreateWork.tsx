@@ -8,7 +8,7 @@ import {
   Visibility,
   type Subject,
 } from '@ncanny/types';
-import { Alert, Button, Card, FormField, Input, Select, Textarea } from '@ncanny/ui';
+import { Alert, Button, FormField, Input, Select, Textarea } from '@ncanny/ui';
 import { createWorkSchema } from '@ncanny/validation';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, type FormEvent } from 'react';
@@ -16,13 +16,13 @@ import { getApiClient } from '../../lib/api';
 import { useAuthStore } from '../../lib/auth-store';
 import { FORM_ERROR, parseForm, toFormErrors, type FieldErrors } from '../../lib/form';
 
-const LABELS: Record<string, string> = {
-  [ContentType.ESSAY]: 'Essay',
-  [ContentType.PAINTING]: 'Painting',
-  [ContentType.ELOCUTION]: 'Elocution',
-  [ContentType.STUDY_ACTIVITY]: 'Study activity',
-  [ContentType.TEACHER_VIDEO]: 'Teaching audio',
-  [ContentType.TEACHER_PRESENTATION]: 'Teaching notes',
+const LABELS: Record<string, { title: string; station: string }> = {
+  [ContentType.ESSAY]: { title: 'Essay', station: 'Library' },
+  [ContentType.PAINTING]: { title: 'Painting', station: 'Studio' },
+  [ContentType.ELOCUTION]: { title: 'Elocution', station: 'Stage' },
+  [ContentType.STUDY_ACTIVITY]: { title: 'Study activity', station: 'Laboratory' },
+  [ContentType.TEACHER_VIDEO]: { title: 'Teaching audio', station: 'Faculty' },
+  [ContentType.TEACHER_PRESENTATION]: { title: 'Teaching notes', station: 'Faculty' },
 };
 
 export function CreateWork() {
@@ -86,21 +86,31 @@ export function CreateWork() {
   };
 
   return (
-    <Card>
+    <div className="hud-frame p-4 sm:p-5">
       <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
         {errors[FORM_ERROR] && <Alert tone="danger">{errors[FORM_ERROR]}</Alert>}
-        <FormField label="Kind of work" error={errors.type}>
-          {({ id, describedBy, invalid }) => (
-            <Select
-              id={id}
-              value={type}
-              onChange={(event) => setType(event.target.value)}
-              aria-describedby={describedBy}
-              invalid={invalid}
-              options={types.map((value) => ({ value, label: LABELS[value] ?? value }))}
-            />
-          )}
-        </FormField>
+        <fieldset>
+          <legend className="text-sm font-medium text-content">Kind of work</legend>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            {types.map((value) => (
+              <button
+                key={value}
+                type="button"
+                aria-pressed={type === value}
+                onClick={() => setType(value)}
+                className={`holo-pad min-h-24 px-3 py-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+                  type === value
+                    ? 'border-primary bg-primary-soft text-content shadow-hud'
+                    : 'border-border bg-surface text-content-muted'
+                }`}
+              >
+                <span className="kicker">{LABELS[value]?.station ?? 'Station'}</span>
+                <span className="mt-1 block text-sm font-semibold">{LABELS[value]?.title ?? value}</span>
+              </button>
+            ))}
+          </div>
+          {errors.type && <p className="mt-1 text-sm text-danger">{errors.type}</p>}
+        </fieldset>
         <FormField label="Title" error={errors.title} required>
           {({ id, describedBy, invalid }) => (
             <Input id={id} name="title" aria-describedby={describedBy} invalid={invalid} />
@@ -158,10 +168,10 @@ export function CreateWork() {
           )}
         </FormField>
         <Button type="submit" loading={submitting}>
-          Publish
+          Publish to the campus
         </Button>
       </form>
-    </Card>
+    </div>
   );
 }
 

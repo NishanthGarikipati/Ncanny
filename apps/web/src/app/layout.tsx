@@ -1,8 +1,12 @@
 import type { Metadata, Viewport } from 'next';
+import { Outfit, Source_Sans_3 } from 'next/font/google';
 import type { ReactNode } from 'react';
 import { AppProviders } from '../components/AppProviders';
 import './globals.css';
 import { themeBootstrapScript, themeStyle } from './theme-style';
+
+const display = Outfit({ subsets: ['latin'], variable: '--font-display' });
+const body = Source_Sans_3({ subsets: ['latin'], variable: '--font-body' });
 
 export const metadata: Metadata = {
   title: {
@@ -25,12 +29,12 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" data-theme="light" suppressHydrationWarning>
+    <html lang="en" data-theme="dark" suppressHydrationWarning>
       <head>
         <style dangerouslySetInnerHTML={{ __html: themeStyle }} />
         <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />
       </head>
-      <body className="min-h-screen bg-surface font-sans text-content">
+      <body className={`${display.variable} ${body.variable} min-h-screen bg-surface font-sans text-content`}>
         <AppProviders>{children}</AppProviders>
       </body>
     </html>

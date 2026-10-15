@@ -8,6 +8,14 @@ import { ContentController } from './content.controller';
 import { ContentService } from './content.service';
 import { MediaStorage } from './media.storage';
 import { Work, WorkSchema } from './schemas/content.schema';
+import {
+  WorkBookmark,
+  WorkBookmarkSchema,
+  WorkCommentRecord,
+  WorkCommentSchema,
+  WorkReaction,
+  WorkReactionSchema,
+} from './schemas/engagement.schema';
 import { HallPresenceRecord, HallPresenceSchema } from './schemas/hall-presence.schema';
 import { MediaAsset, MediaAssetSchema } from './schemas/media-asset.schema';
 
@@ -17,6 +25,9 @@ import { MediaAsset, MediaAssetSchema } from './schemas/media-asset.schema';
       { name: Work.name, schema: WorkSchema },
       { name: MediaAsset.name, schema: MediaAssetSchema },
       { name: HallPresenceRecord.name, schema: HallPresenceSchema },
+      { name: WorkReaction.name, schema: WorkReactionSchema },
+      { name: WorkCommentRecord.name, schema: WorkCommentSchema },
+      { name: WorkBookmark.name, schema: WorkBookmarkSchema },
     ]),
     IdentityModule,
     ProfilesModule,

@@ -15,6 +15,8 @@ export interface TabsProps {
   activeId: string;
   onChange: (id: string) => void;
   className?: string;
+  /** `pill` is the neon console tab from the Ncanny references. */
+  tone?: 'line' | 'pill';
   'aria-label': string;
 }
 
@@ -23,7 +25,7 @@ export interface TabsProps {
  * Only the active tab is in the tab order, so keyboard users traverse the list
  * with arrows rather than tabbing through every option.
  */
-export function Tabs({ items, activeId, onChange, className, ...props }: TabsProps) {
+export function Tabs({ items, activeId, onChange, className, tone = 'line', ...props }: TabsProps) {
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLButtonElement>) => {
       const currentIndex = items.findIndex((item) => item.id === activeId);
@@ -54,7 +56,11 @@ export function Tabs({ items, activeId, onChange, className, ...props }: TabsPro
     <div
       role="tablist"
       aria-label={props['aria-label']}
-      className={cn('flex gap-1 overflow-x-auto border-b border-border', className)}
+      className={cn(
+        'flex gap-2 overflow-x-auto',
+        tone === 'line' && 'border-b border-border',
+        className,
+      )}
     >
       {items.map((item) => {
         const active = item.id === activeId;
@@ -70,12 +76,16 @@ export function Tabs({ items, activeId, onChange, className, ...props }: TabsPro
             onClick={() => onChange(item.id)}
             onKeyDown={handleKeyDown}
             className={cn(
-              'flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 px-4 py-2.5',
-              'text-sm font-medium transition-colors duration-base motion-reduce:transition-none',
+              'flex shrink-0 items-center gap-2 whitespace-nowrap px-4 py-2.5',
+              'text-sm font-semibold transition-colors duration-base motion-reduce:transition-none',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
-              active
-                ? 'border-primary text-primary'
-                : 'border-transparent text-content-muted hover:text-content',
+              tone === 'pill'
+                ? active
+                  ? 'rounded-xl border-2 border-accent bg-accent text-white shadow-hud'
+                  : 'rounded-xl border-2 border-primary/70 bg-surface-sunken text-content hover:border-primary'
+                : active
+                  ? 'border-b-2 border-primary text-primary'
+                  : 'border-b-2 border-transparent text-content-muted hover:text-content',
             )}
           >
             {item.icon}

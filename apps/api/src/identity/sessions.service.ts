@@ -149,6 +149,21 @@ export class SessionsService {
       .exec();
   }
 
+  async revokeOthersForUser(
+    userId: Types.ObjectId,
+    keepSessionId: string,
+    reason = 'password_changed',
+  ): Promise<number> {
+    const filter: Record<string, unknown> = { userId, revokedAt: { $exists: false } };
+    if (Types.ObjectId.isValid(keepSessionId)) {
+      filter._id = { $ne: new Types.ObjectId(keepSessionId) };
+    }
+    const result = await this.sessionModel
+      .updateMany(filter, { $set: { revokedAt: new Date(), revokedReason: reason } })
+      .exec();
+    return result.modifiedCount;
+  }
+
   async revokeAllForUser(userId: Types.ObjectId, reason = 'logout_all'): Promise<number> {
     const result = await this.sessionModel
       .updateMany(

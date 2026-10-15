@@ -143,9 +143,9 @@ progress are visible.*
 - [x] F4.1 `media_assets` plus local disk storage (`MEDIA_ROOT`). Declared MIME is checked against magic bytes and size. Reads are authenticated base64, so a file is not a public URL. S3 signed upload, thumbnails, virus scan, and upload progress are not built (`DL-0015`).
 - [x] F4.2 `works` for essay, painting, elocution, study activity, teaching notes and teaching audio, with visibility and status. Create and view only. Edit and delete are not built.
 - [x] F4.3 Create flow on the web (kind, writing or file, subject, visibility, publish) and on mobile for writing. No separate preview step. Topics are not collected.
-- [ ] F4.4 Engagement: comments, likes, peer feedback.
-- [x] F4.5 Preceptor review: score and written feedback, audited. Badge award is not built. This is not AI grading.
-- [x] TEST: content e2e covers school visibility, private work hidden from a schoolmate, preceptor-only review, rejected image bytes, and hall presence that does not include an email.
+- [x] F4.4 Engagement on a visible school work: like, smile, comment (500 characters, reportable), bookmark. Not direct messages. A person's own like is stored and is not a rank signal.
+- [x] F4.5 Preceptor review: score and written feedback, audited. A Preceptor can award shield, star or medal once per work, not on their own work. This is not AI grading.
+- [x] TEST: content e2e covers school visibility, private work hidden from a schoolmate, preceptor-only review, rejected image bytes, hall presence that does not include an email, reactions and comments blocked for another school, badge rules, the school roster, and password change.
 
 ## EPIC 5 — Academic Feed (Phase 5) — partial
 
@@ -157,7 +157,7 @@ progress are visible.*
 
 - [x] F6.1 2D whiteboard of school work on web and mobile. Opening a piece uses the same reader, including the Preceptor mark form. Search, subject filters and sort controls are not in the UI.
 - [ ] F6.2 Real-time board updates.
-- [x] F6.3 Three.js academic hall on the web, loaded only after "Enter the 3D hall". No WebGL stays on the whiteboard. `prefers-reduced-motion` uses orbit controls instead of pointer lock. Clicking a panel opens the same reader. There is no chat. Unity is not used (`DL-0005`, `DL-0016`). Mobile does not render the hall.
+- [x] F6.3 The blackboard is a hall of hanging cards (`DL-0018`, `DL-0021`, `DL-0022`). With WebGL, a third-person avatar walks among the cards; the flat board is one control away and is the only board without WebGL. Like, comment, badge and rank open the piece on the same page. Filters only change which cards hang. Opted-in classmates are name tokens. There is no chat. The earlier pointer-lock hall stays unlinked. A Unity player is not built: this environment has no Unity Editor. Mobile uses station chips on the same feed.
 
 ## EPIC 7 — Subject Network (Phase 7)
 - F7.1 Topics and subtopics · F7.2 Subject pages · F7.3 Following · F7.4 Global search with filters · F7.5 Recommendations.

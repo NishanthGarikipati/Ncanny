@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
-import { UserRole, UserStatus } from '@ncanny/types';
+import { AVATAR_PRESETS, UserRole, UserStatus, type AvatarPreset } from '@ncanny/types';
 
 /**
  * Account record. Deliberately holds only identity and credentials — academic
@@ -39,6 +39,9 @@ export class User {
 
   @Prop({ type: String })
   avatarUrl?: string;
+
+  @Prop({ type: String, enum: AVATAR_PRESETS })
+  avatarPreset?: AvatarPreset;
 
   @Prop({ type: Types.ObjectId, ref: 'School', index: true })
   schoolId?: Types.ObjectId;

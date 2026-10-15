@@ -5,6 +5,7 @@ import { Alert, Card, CardHeader, EmptyState, LoadingState } from '@ncanny/ui';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { getApiClient } from '../../lib/api';
+import { WorkPlaque } from './WorkPlaque';
 
 export function SchoolFeed({ isScholar, profileHref }: { isScholar: boolean; profileHref: string }) {
   const [works, setWorks] = useState<WorkCard[] | null>(null);
@@ -24,11 +25,11 @@ export function SchoolFeed({ isScholar, profileHref }: { isScholar: boolean; pro
   return (
     <Card>
       <CardHeader
-        title="Your school"
-        description="Newest published work. The whiteboard holds the full wall."
+        title="School board"
+        description="Newest work from your school. The campus is where you play with it."
         action={
           <Link href="/explore" className="text-sm font-medium text-primary">
-            Open whiteboard
+            Open campus
           </Link>
         }
       />
@@ -53,28 +54,18 @@ export function SchoolFeed({ isScholar, profileHref }: { isScholar: boolean; pro
         />
       )}
       {works && works.length > 0 && (
-        <ul className="flex flex-col gap-3">
+        <ul className="grid gap-3 sm:grid-cols-2">
           {works.map((work) => (
             <li key={work.id}>
-              <Link href={`/work/${work.id}`} className="block rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
-                <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-                  {work.type.replaceAll('_', ' ')}
-                </p>
-                <p className="font-medium text-content">{work.title}</p>
-                <p className="text-sm text-content-muted">
-                  {work.authorName} · {work.subjectName}
-                  {work.review ? ` · ${work.review.score}/100` : ''}
-                </p>
-              </Link>
+              <WorkPlaque work={work} />
             </li>
           ))}
         </ul>
       )}
       <p className="mt-4 text-sm text-content-muted">
         <Link href={profileHref} className="font-medium text-primary">
-          Your profile
-        </Link>{' '}
-        still holds your Canny ID and subjects.
+          Open your character sheet
+        </Link>
       </p>
     </Card>
   );

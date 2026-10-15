@@ -10,12 +10,14 @@ import type {
   AccessTokenClaims,
 } from '@ncanny/types';
 import {
+  changePasswordSchema,
   loginSchema,
   otpRequestSchema,
   otpVerifySchema,
   refreshTokenSchema,
   registerPreceptorSchema,
   registerScholarSchema,
+  type ChangePasswordInput,
   type LoginInput,
   type OtpRequestInput,
   type OtpVerifyInput,
@@ -151,6 +153,24 @@ export class AuthController {
   @ApiOperation({ summary: 'Get the signed-in account' })
   async me(@AuthenticatedUser() claims: AccessTokenClaims): Promise<CurrentUser> {
     return this.authService.getCurrentUser(claims.sub);
+  }
+
+  @Post('password')
+  @HttpCode(HttpStatus.OK)
+  @Throttle(AUTH_THROTTLE)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Change the signed-in password',
+    description: 'Checks the current password, stores a new hash, and signs out other devices.',
+  })
+  @ApiZodBody(changePasswordSchema)
+  @ApiErrorResponse(401, 'INVALID_CREDENTIALS', 'The current password is incorrect')
+  async changePassword(
+    @AuthenticatedUser() claims: AccessTokenClaims,
+    @Body(zodBody(changePasswordSchema)) input: ChangePasswordInput,
+    @Req() request: NcannyRequest,
+  ): Promise<{ changed: true }> {
+    return this.authService.changePassword(claims.sub, claims.sessionId, input, contextOf(request));
   }
 
   @Get('sessions')

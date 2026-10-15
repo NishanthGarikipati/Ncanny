@@ -1,7 +1,7 @@
 'use client';
 
 import type { WorkDetail } from '@ncanny/types';
-import { Alert, Card, LoadingState } from '@ncanny/ui';
+import { Alert, LoadingState } from '@ncanny/ui';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { getApiClient } from '../../lib/api';
@@ -27,7 +27,7 @@ export function WorkPage({ id }: { id: string }) {
       <div className="mx-auto flex max-w-2xl flex-col gap-4">
         <Alert tone="danger">{error}</Alert>
         <Link href="/explore" className="text-sm font-medium text-primary">
-          Back to the whiteboard
+          Back to the campus
         </Link>
       </div>
     );
@@ -40,11 +40,9 @@ export function WorkPage({ id }: { id: string }) {
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-4">
       <Link href="/explore" className="text-sm font-medium text-primary">
-        Back to the whiteboard
+        Back to the campus
       </Link>
-      <Card>
-        <WorkReader work={work} />
-      </Card>
+      <WorkReader work={work} />
     </div>
   );
 }

@@ -72,17 +72,17 @@ exist, feature incomplete · **Missing** = not started.
 | Canny ID issuance | Done |
 | Scholar profile (read/update, stats scaffold) | Done |
 | Preceptor profile (read/update, stats scaffold) | Done |
-| School entity + directory | Partial (entity, lookup, auto-provision on registration; no admin console) |
+| School entity + directory | Partial (entity, lookup, auto-provision, own-school roster page; no admin console) |
 | Subjects / topics | Partial (subject catalogue + seed; topics/subtopics missing) |
-| Content system (essay / elocution / painting / study activity) | Partial (create, view, school visibility, Preceptor mark; no edit, delete, comments or likes) |
+| Content system (essay / elocution / painting / study activity) | Partial (create, view, school visibility, Preceptor mark, like, smile, comment, bookmark, badge; no edit or delete) |
 | Academic feed | Partial (school chronological feed; no ranking, trending or category chips) |
-| Whiteboard 2D / 3D | Partial (2D wall on web and mobile; web Three.js hall, capability-gated; no search, filters, realtime or Unity) |
-| Gamification (XP, levels, badges, ranks, leaderboards) | Missing (XP/level fields reserved on profiles) |
+| Whiteboard 2D / 3D | Partial (web blackboard walks a third-person avatar among hanging cards when WebGL exists, with the flat board one control away; mobile keeps a station list of the same feed; no search, realtime, chat, or Unity player. The pointer-lock hall is not linked) |
+| Gamification (XP, levels, badges, ranks, leaderboards) | Partial (a Preceptor can award shield, star or medal; XP, ranks and leaderboards are not calculated) |
 | Real-time (Socket.io) | Missing |
 | Notifications | Missing |
 | Messaging | Missing |
 | Search | Missing |
-| Settings | Partial (theme + account shell on web) |
+| Settings | Partial (theme, sessions, password change; no billing, 2FA or language packs) |
 | School subscription / payments | Missing |
 | Admin console | Missing |
 | Mobile app | Partial (attendance, registration, profile, writing, whiteboard; the hall is web-only) |
@@ -156,5 +156,6 @@ local media with magic-byte checks, a Preceptor mark, reports that flag a piece,
 on web and mobile, and a Three.js academic hall on the web. The hall reads the same works, opens
 the same reader, and shows opt-in nameplates. It does not add chat.
 
-Still absent, on purpose: S3, edit/delete, comments, likes, search filters, realtime updates,
-Unity, mobile 3D, XP and badges for publishing, and a moderation console.
+Still absent, on purpose: S3, edit/delete, search, realtime updates, direct messages, Unity,
+mobile 3D, XP and ranks, billing, 2FA, language packs, and a moderation console. Likes, smile
+reactions, comments, bookmarks and Preceptor badges exist on work the viewer is allowed to see.
