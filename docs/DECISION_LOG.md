@@ -346,3 +346,20 @@ with name and Canny ID. There is no chat.
 **Consequences.** This is the browser runtime already in the web app, not a Unity WebGL player.
 A later Unity build can replace the scene only if it keeps the 2D board and the same actions.
 The earlier pointer-lock hall stays unlinked.
+
+---
+
+### DL-0023 — Hall figures are stylised people, not photographs
+
+**Context.** The first walking figures were capsules. The request was for avatars that look like
+real humans and respond when you interact. The people in the hall include scholars, who are
+minors. A photograph or a generated face would identify a child.
+
+**Decision.** Each person is the same stylised build: hair, ears, simple eyes and nose, a shirt,
+a role-coloured vest, jointed arms and legs, and shoes. The viewer's figure walks with a stride,
+turns toward a card they open, and raises an arm to wave. Clicking a person also waves.
+Classmates shift their weight while standing. Reduced motion holds the standing pose. No face
+is stored, uploaded, or generated.
+
+**Consequences.** The figures read as people from the camera behind them. They are not likenesses
+of the students. A later change must not replace them with photographs of minors.

@@ -84,7 +84,7 @@ export function AvatarHallView({
       <p className="mb-2 text-sm text-content-muted">
         {reducedMotion
           ? 'Walking is off. Click a hanging card to open the work.'
-          : 'That figure is your avatar. W A S D moves, drag looks around, and a click opens like, comment, badge, or rank.'}
+          : 'That figure is your avatar. W A S D walks, a card makes them turn and wave, and a click on them waves too.'}
       </p>
       <div className="relative h-[70vh] min-h-[28rem] overflow-hidden rounded-2xl border-2 border-primary/70 bg-[#07111f]">
       <div ref={mountRef} className="h-full w-full" />
