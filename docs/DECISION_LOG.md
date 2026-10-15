@@ -324,3 +324,25 @@ There is still no chat, and the page does not require WebGL. Reduced motion alre
 
 **Consequences.** The earlier Three.js hall stays unlinked. Mobile keeps a list of the same feed.
 Rank on a card is the Preceptor's mark, not a calculated leaderboard.
+
+---
+
+### DL-0022 — The walking hall is a third-person avatar, and it is not a Unity build
+
+**Context.** The hall references show a person walking among hanging work and using like, comment,
+badge and rank. The request was to build that in Unity so the avatar interaction would match.
+This environment has no Unity Editor and no Unity license, so a Unity player cannot be compiled
+or embedded.
+
+**Decision.** When the browser can draw WebGL, the blackboard opens on a third-person avatar.
+The camera stays behind that figure. W A S D, the arrow keys, the on-screen pad, and a click on
+the floor move it. Dragging looks around. Pointer lock is not used. Each hanging card has
+like, comment, badge and rank marks. Those marks call the same actions as the flat board, and a
+click on the card opens the piece. The flat board remains one
+control away, and it is the only board when WebGL is missing. Reduced motion disables walking and
+camera movement; a click still opens a card. Classmates who opted in are simple figures labelled
+with name and Canny ID. There is no chat.
+
+**Consequences.** This is the browser runtime already in the web app, not a Unity WebGL player.
+A later Unity build can replace the scene only if it keeps the 2D board and the same actions.
+The earlier pointer-lock hall stays unlinked.

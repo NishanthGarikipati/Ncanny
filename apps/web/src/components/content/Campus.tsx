@@ -8,6 +8,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { getApiClient } from '../../lib/api';
 import { useAuthStore } from '../../lib/auth-store';
 import { FORM_ERROR, parseForm, toFormErrors, type FieldErrors } from '../../lib/form';
+import { AvatarHallView } from '../../world/AvatarHallView';
+import { detectWebGl, type WebGlSupport } from '../../world/webgl';
 import { BadgeMark, MarkStars } from '../neon';
 import { ElocutionStage } from './ElocutionStage';
 import { EngagementBar } from './EngagementBar';
@@ -50,6 +52,12 @@ export function Campus() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [detail, setDetail] = useState<WorkDetail | null>(null);
   const [detailError, setDetailError] = useState<string | null>(null);
+  const [webgl, setWebgl] = useState<WebGlSupport | null>(null);
+  const [walk, setWalk] = useState(true);
+
+  useEffect(() => {
+    setWebgl(detectWebGl());
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -116,9 +124,21 @@ export function Campus() {
     });
   };
 
+  const actOnCard = async (workId: string, action: 'open' | 'like' | 'comment' | 'badge' | 'rank') => {
+    if (action === 'like') {
+      try {
+        applyDetail(await getApiClient().content.react(workId, { kind: 'like' }));
+      } catch {
+        setDetailError('Could not save that like.');
+      }
+    }
+    openPiece(workId);
+  };
+
   if (error) return <Alert tone="danger">{error}</Alert>;
   if (!hall || !viewer) return <LoadingState label="Opening the blackboard" />;
 
+  const walking = walk && (webgl === 'webgl' || webgl === 'webgl2');
   const likes = hall.works.reduce((sum, work) => sum + work.engagement.likeCount, 0);
   const comments = hall.works.reduce((sum, work) => sum + work.engagement.commentCount, 0);
   const badges = hall.works.reduce((sum, work) => sum + work.engagement.badges.length, 0);
@@ -129,9 +149,16 @@ export function Campus() {
       <div className="board-room">
         <div className="relative flex flex-wrap items-center justify-between gap-3 px-4 pb-1 pt-4">
           <h1 className="neon-title text-lg sm:text-2xl">Ncanny Whiteboard/Blackboard</h1>
-          <Button variant={hall.viewerOptedIn ? 'secondary' : 'primary'} onClick={() => void setPresence(!hall.viewerOptedIn)}>
-            {hall.viewerOptedIn ? 'Step off the floor' : 'Step onto the floor'}
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            {webgl !== 'none' && (
+              <Button variant="secondary" onClick={() => setWalk((current) => !current)}>
+                {walking ? 'Flat board' : 'Walk with your avatar'}
+              </Button>
+            )}
+            <Button variant={hall.viewerOptedIn ? 'secondary' : 'primary'} onClick={() => void setPresence(!hall.viewerOptedIn)}>
+              {hall.viewerOptedIn ? 'Step off the floor' : 'Step onto the floor'}
+            </Button>
+          </div>
         </div>
         <div className="relative flex flex-wrap gap-2 px-4 pb-2" aria-label="Board totals">
           <HeaderChip label="likes" count={likes} pressed={filter === 'likes'} onClick={() => setFilter('likes')} />
@@ -142,6 +169,26 @@ export function Campus() {
 
         <div className="relative grid gap-3 p-3 lg:grid-cols-[minmax(0,1fr)_14.5rem]">
           <div>
+            {walking ? (
+              <div className="relative">
+                <AvatarHallView
+                  works={works}
+                  presence={hall.presence}
+                  viewer={{ fullName: viewer.fullName, cannyId: viewer.cannyId, role: viewer.role }}
+                  selectedId={selectedId}
+                  onAct={(workId, action) => void actOnCard(workId, action)}
+                />
+                {works.length === 0 && (
+                  <div className="pointer-events-none absolute inset-x-8 top-16">
+                    <EmptyState
+                      title="This board is quiet"
+                      description="Publish a piece for your school and it hangs in front of your avatar."
+                    />
+                  </div>
+                )}
+              </div>
+            ) : (
+            <>
             <section className="board-screen" aria-label="Hanging school work">
               {works.length === 0 ? (
                 <div className="p-4">
@@ -200,6 +247,8 @@ export function Campus() {
                 </p>
               )}
             </div>
+            </>
+            )}
           </div>
 
           <aside className="hud-frame flex flex-col gap-2 p-3" aria-label="Board filters">
