@@ -157,7 +157,7 @@ progress are visible.*
 
 - [x] F6.1 2D whiteboard of school work on web and mobile. Opening a piece uses the same reader, including the Preceptor mark form. Search, subject filters and sort controls are not in the UI.
 - [ ] F6.2 Real-time board updates.
-- [x] F6.3 Campus game board is the way you play with school work (`DL-0018`). Stations filter the same works, plaques open the reader, and opted-in classmates are name tokens. There is no chat and no WebGL requirement. The earlier Three.js pointer-lock hall remains in the repo and is not linked from navigation. Unity is not used. Mobile uses station chips on the same feed.
+- [x] F6.3 The blackboard is a hall of hanging cards (`DL-0018`, `DL-0021`). Like, comment, badge and rank run on the card and open the piece on the same page. Filters only change which cards hang. Opted-in classmates are name tokens on the floor. There is no chat and no WebGL requirement. The earlier Three.js pointer-lock hall remains in the repo and is not linked from navigation. Unity is not used. Mobile uses station chips on the same feed.
 
 ## EPIC 7 — Subject Network (Phase 7)
 - F7.1 Topics and subtopics · F7.2 Subject pages · F7.3 Following · F7.4 Global search with filters · F7.5 Recommendations.

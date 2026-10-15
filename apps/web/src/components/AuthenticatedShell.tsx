@@ -11,7 +11,7 @@ import { ThemeToggle } from './ThemeToggle';
 
 const NAV = [
   { id: 'home', label: 'Lobby', href: '/home' },
-  { id: 'explore', label: 'Campus', href: '/explore' },
+  { id: 'explore', label: 'Blackboard', href: '/explore' },
   { id: 'create', label: 'Create', href: '/create' },
   { id: 'activity', label: 'Quests', href: '/activity' },
   { id: 'school', label: 'School', href: '/school' },

@@ -76,7 +76,7 @@ exist, feature incomplete · **Missing** = not started.
 | Subjects / topics | Partial (subject catalogue + seed; topics/subtopics missing) |
 | Content system (essay / elocution / painting / study activity) | Partial (create, view, school visibility, Preceptor mark, like, smile, comment, bookmark, badge; no edit or delete) |
 | Academic feed | Partial (school chronological feed; no ranking, trending or category chips) |
-| Whiteboard 2D / 3D | Partial (web campus board and mobile station chips over the same school works; no search, realtime, chat, or Unity. The pointer-lock hall is not linked) |
+| Whiteboard 2D / 3D | Partial (web blackboard is a hall of hanging cards with like, comment, badge and rank on the same page; mobile keeps a station list of the same feed; no search, realtime, chat, or Unity. The pointer-lock hall is not linked) |
 | Gamification (XP, levels, badges, ranks, leaderboards) | Partial (a Preceptor can award shield, star or medal; XP, ranks and leaderboards are not calculated) |
 | Real-time (Socket.io) | Missing |
 | Notifications | Missing |

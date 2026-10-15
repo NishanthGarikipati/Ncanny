@@ -308,3 +308,19 @@ switch are not presented as working controls.
 **Consequences.** Comments are notes on a visible work, not private messages. Hidden work returns
 the same not-found response as a missing work. Student email, phone and home address stay off
 the school page and the profile.
+
+---
+
+### DL-0021 — The blackboard is a hall of interactive cards
+
+**Context.** DL-0018 replaced the pointer-lock room with a flat campus list. The later references
+show a hall: work hangs in front of a class, and like, comment, badge and rank sit on the cards.
+A first-person walk was already rejected.
+
+**Decision.** The blackboard page draws that hall in the page itself. Cards keep the real like,
+comment, badge and rank actions. Choosing one opens the piece, including audio, on the same page.
+Opted-in classmates stand on the ring as name and Canny ID. Filters only change which cards hang.
+There is still no chat, and the page does not require WebGL. Reduced motion already stops animation.
+
+**Consequences.** The earlier Three.js hall stays unlinked. Mobile keeps a list of the same feed.
+Rank on a card is the Preceptor's mark, not a calculated leaderboard.
