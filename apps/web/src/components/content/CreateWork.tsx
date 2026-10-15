@@ -98,7 +98,7 @@ export function CreateWork() {
                 type="button"
                 aria-pressed={type === value}
                 onClick={() => setType(value)}
-                className={`min-h-20 rounded-xl border px-3 py-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+                className={`holo-pad min-h-24 px-3 py-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                   type === value
                     ? 'border-primary bg-primary-soft text-content shadow-hud'
                     : 'border-border bg-surface text-content-muted'

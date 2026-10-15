@@ -9,20 +9,28 @@ export const metadata: Metadata = {
 
 export default function AttendancePage() {
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-4 py-12">
-      <div className="hud-frame mb-6 p-5">
-        <Link
-          href="/"
-          className="text-sm text-content-muted hover:text-content focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-        >
-          Ncanny
-        </Link>
-        <h1 className="mt-2 font-display text-2xl font-semibold text-content">Mark attendance</h1>
-        <p className="mt-1 text-sm text-content-muted">
-          Signing in records your attendance streak for the day. Then the campus opens.
-        </p>
-        <div className="mt-5">
-          <AttendanceForm />
+    <main className="mx-auto flex min-h-screen max-w-3xl flex-col justify-center px-4 py-12">
+      <div className="hud-frame mb-6 p-5 sm:p-7">
+        <div className="flex justify-center">
+          <h1 className="neon-title text-xl sm:text-2xl">Ncanny Sign In</h1>
+        </div>
+        <div className="mt-5 grid items-center gap-6 md:grid-cols-[11rem_1fr]">
+          <div className="flex flex-col items-center">
+            <div className="portrait portrait-lg" aria-hidden="true">
+              N
+            </div>
+            <Link href="/" className="id-plate w-full text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+              Ncanny
+            </Link>
+          </div>
+          <div>
+            <p className="text-sm text-content-muted">
+              Mark attendance with email or a phone code. Then the whiteboard opens.
+            </p>
+            <div className="mt-5">
+              <AttendanceForm />
+            </div>
+          </div>
         </div>
       </div>
 

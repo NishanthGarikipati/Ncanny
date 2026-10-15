@@ -1,11 +1,12 @@
 'use client';
 
 import { UserRole, type WorkDetail } from '@ncanny/types';
-import { Alert, Badge, Button, FormField, Input, Textarea } from '@ncanny/ui';
+import { Alert, Button, FormField, Input, Textarea } from '@ncanny/ui';
 import { reviewWorkSchema, reportWorkSchema } from '@ncanny/validation';
 import { useEffect, useState } from 'react';
 import { getApiClient } from '../../lib/api';
 import { useAuthStore } from '../../lib/auth-store';
+import { MarkStars, Portrait } from '../neon';
 import { FORM_ERROR, parseForm, toFormErrors, type FieldErrors } from '../../lib/form';
 
 export function WorkReader({ work, onClose }: { work: WorkDetail; onClose?: () => void }) {
@@ -70,27 +71,32 @@ export function WorkReader({ work, onClose }: { work: WorkDetail; onClose?: () =
     }
   };
 
+  const heading =
+    current.type === 'ELOCUTION' ? 'Elocution' : current.type === 'ESSAY' ? 'Essay Writing' : current.type.replaceAll('_', ' ');
+
   return (
-    <article className="hud-frame flex flex-col gap-4 p-5 sm:p-6">
-      <header className="flex items-start justify-between gap-3">
-        <div>
-          <p className="kicker">{current.type.replaceAll('_', ' ')}</p>
-          <h2 className="mt-1 font-display text-2xl font-semibold text-content">{current.title}</h2>
-          <p className="text-sm text-content-muted">
-            {current.authorName} · {current.authorCannyId} · {current.subjectName}
-          </p>
-        </div>
+    <article className="hud-frame flex flex-col gap-4 p-4 sm:p-6">
+      <div className="flex items-start justify-between gap-3">
+        <h2 className="neon-title text-lg sm:text-2xl">{heading}</h2>
         {onClose && (
           <Button variant="ghost" size="sm" onClick={onClose}>
             Close
           </Button>
         )}
-      </header>
-
-      <div className="flex flex-wrap gap-2">
-        <Badge tone="primary">{current.type.replaceAll('_', ' ')}</Badge>
-        {current.review && <Badge tone="success">Marked {current.review.score}/100</Badge>}
       </div>
+
+      <div className="grid gap-4 md:grid-cols-[11rem_1fr]">
+        <aside className="flex flex-col items-center text-center">
+          <Portrait name={current.authorName} size="md" />
+          <p className="mt-2 font-semibold text-content">{current.authorName}</p>
+          <p className="font-mono text-xs text-content-muted">{current.authorCannyId}</p>
+          <p className="mt-1 text-xs text-content-muted">{current.subjectName}</p>
+          <div className="mt-2">
+            <MarkStars score={current.review?.score} />
+          </div>
+        </aside>
+        <div className="flex flex-col gap-3">
+          <h3 className="font-display text-3xl font-semibold text-content">{current.title}</h3>
 
       {mediaUrl && current.mediaKind === 'IMAGE' && (
         // The bytes were fetched with the viewer's token; a plain img URL would skip that check.
@@ -101,8 +107,7 @@ export function WorkReader({ work, onClose }: { work: WorkDetail; onClose?: () =
       )}
       {mediaUrl && current.mediaKind === 'AUDIO' && (
         <div className="stage">
-          <p className="kicker">Elocution</p>
-          <p className="mt-1 text-sm text-content-muted">Play the recording. A transcript, when the author wrote one, is below.</p>
+          <p className="kicker">Play</p>
           <audio controls src={mediaUrl} className="mt-3 w-full" />
         </div>
       )}
@@ -167,6 +172,8 @@ export function WorkReader({ work, onClose }: { work: WorkDetail; onClose?: () =
         </form>
       )}
       {reported && <Alert tone="success">Reported. Thank you for flagging it.</Alert>}
+        </div>
+      </div>
     </article>
   );
 }

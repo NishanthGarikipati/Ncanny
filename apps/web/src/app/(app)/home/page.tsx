@@ -19,8 +19,7 @@ export default function HomePage() {
   return (
     <div className="flex flex-col gap-6">
       <header className="hud-frame p-5 sm:p-6">
-        <p className="kicker">Lobby</p>
-        <h1 className="mt-1 font-display text-3xl font-semibold text-content">
+        <h1 className="neon-title text-2xl sm:text-3xl">
           Welcome back, {user.fullName.split(' ')[0]}
         </h1>
         <p className="mt-2 max-w-2xl text-sm text-content-muted">

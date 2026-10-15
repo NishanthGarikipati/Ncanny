@@ -49,7 +49,7 @@ function RoleChooser({ onChoose }: { onChoose: (role: SelfRegisterRole) => void 
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       {options.map((option) => (
-        <Card key={option.role} tone="raised" padded={false}>
+        <Card key={option.role} tone="raised" padded={false} className={option.role === UserRole.SCHOLAR ? 'border-2 border-primary shadow-hud' : 'border-2 border-accent shadow-hud'}>
           <button
             type="button"
             onClick={() => onChoose(option.role)}

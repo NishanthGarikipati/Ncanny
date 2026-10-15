@@ -57,7 +57,7 @@ export function AuthenticatedShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen pb-24 lg:pb-8">
-      <header className="sticky top-0 z-20 border-b border-border/80 bg-surface/85 backdrop-blur">
+      <header className="sticky top-0 z-20 border-b-2 border-primary/50 bg-surface/90 shadow-hud backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
           <Link href="/home" className="flex items-center gap-2 font-display text-xl font-semibold tracking-tight text-content">
             <span aria-hidden="true" className="grid h-8 w-8 place-items-center rounded-lg border border-primary/50 bg-primary-soft text-sm text-primary">

@@ -271,3 +271,19 @@ setting. The first-person hall is no longer a navigation path.
 
 **Consequences.** 2D and the campus show the same works. WebGL is not required to play. Mobile
 keeps a station-filtered list of the same feed. Unity and proximity chat stay out.
+
+---
+
+### DL-0019 — Neon console chrome follows the supplied references
+
+**Context.** The supplied screens are cyan-and-magenta consoles: a portrait plate and Canny ID
+banner, pill tabs for Paintings / Essays / Elocution / Study Activities, an essay card with the
+author beside the writing, an elocution stage, a registration role choice, and a whiteboard of
+hanging cards. The first campus pass was too close to a plain dashboard.
+
+**Decision.** Dark surfaces move to the reference navy, and those screens use the bezel, portrait
+slot, pill tabs, and hanging cards. Likes, comments, billing, 2FA, and a generated 3D avatar are
+not drawn as if they work. Home address stays off the profile. A Preceptor mark is shown as stars.
+
+**Consequences.** The product looks like the references where a real action exists. Empty badges
+stay empty. Light theme remains available.

@@ -42,13 +42,11 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-6">
-      <header>
-        <p className="kicker">Base</p>
-        <h1 className="mt-1 font-display text-3xl font-semibold text-content">Settings</h1>
-      </header>
+    <div className="mx-auto flex max-w-5xl flex-col gap-6">
+      <h1 className="neon-title text-2xl">Profile settings</h1>
 
-      <Card>
+      <div className="grid gap-4 lg:grid-cols-2">
+      <Card className="border-2 border-primary shadow-hud">
         <CardHeader title="Account" />
         <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
           <div>
@@ -77,9 +75,9 @@ export default function SettingsPage() {
         </dl>
       </Card>
 
-      <Card>
+      <Card className="border-2 border-primary shadow-hud">
         <CardHeader
-          title="Recent sign-ins"
+          title="Login activity"
           description="If you do not recognise one of these, sign out everywhere and change your password."
         />
         <div className="mt-4">
@@ -113,11 +111,12 @@ export default function SettingsPage() {
           <Button variant="secondary" onClick={() => void signOut()}>
             Sign out
           </Button>
-          <Button variant="danger" onClick={() => void signOutEverywhere()}>
+          <Button variant="accent" onClick={() => void signOutEverywhere()}>
             Sign out everywhere
           </Button>
         </div>
       </Card>
+      </div>
     </div>
   );
 }
