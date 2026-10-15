@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { ErrorCode, UserStatus, type CurrentUser, type UserRole } from '@ncanny/types';
+import { ErrorCode, UserStatus, type AvatarPreset, type CurrentUser, type UserRole } from '@ncanny/types';
 import { AppException } from '../common/errors/app.exception';
 import { User, type UserDocument } from './schemas/user.schema';
 
@@ -13,6 +13,7 @@ export interface CreateUserInput {
   cannyId?: string;
   fullName: string;
   avatarUrl?: string;
+  avatarPreset?: AvatarPreset;
   schoolId?: Types.ObjectId;
 }
 
@@ -40,12 +41,26 @@ export class UsersService {
   }
 
   /** Includes the password hash, which is excluded from ordinary reads. */
+  async findByIdWithPassword(id: string): Promise<UserDocument | null> {
+    if (!Types.ObjectId.isValid(id)) return null;
+    return this.userModel.findById(id).select('+passwordHash').exec();
+  }
+
   async findByEmailWithPassword(email: string): Promise<UserDocument | null> {
     return this.userModel.findOne({ email: email.toLowerCase() }).select('+passwordHash').exec();
   }
 
   async findByPhone(phone: string): Promise<UserDocument | null> {
     return this.userModel.findOne({ phone }).exec();
+  }
+
+  async findByIds(ids: Types.ObjectId[]): Promise<UserDocument[]> {
+    if (ids.length === 0) return [];
+    return this.userModel.find({ _id: { $in: ids } }).exec();
+  }
+
+  async setPasswordHash(userId: Types.ObjectId, passwordHash: string): Promise<void> {
+    await this.userModel.updateOne({ _id: userId }, { $set: { passwordHash } }).exec();
   }
 
   async findByCannyId(cannyId: string): Promise<UserDocument | null> {
@@ -110,7 +125,7 @@ export class UsersService {
 
   async updateIdentityFields(
     userId: Types.ObjectId,
-    updates: { fullName?: string; avatarUrl?: string | null },
+    updates: { fullName?: string; avatarUrl?: string | null; avatarPreset?: AvatarPreset },
   ): Promise<void> {
     const set: Record<string, unknown> = {};
     const unset: Record<string, unknown> = {};
@@ -122,6 +137,9 @@ export class UsersService {
       unset.avatarUrl = '';
     } else if (updates.avatarUrl !== undefined) {
       set.avatarUrl = updates.avatarUrl;
+    }
+    if (updates.avatarPreset !== undefined) {
+      set.avatarPreset = updates.avatarPreset;
     }
 
     if (Object.keys(set).length === 0 && Object.keys(unset).length === 0) {
@@ -150,6 +168,7 @@ export class UsersService {
       phone: user.phone,
       fullName: user.fullName,
       avatarUrl: user.avatarUrl,
+      avatarPreset: user.avatarPreset,
       schoolId: user.schoolId ? user.schoolId.toString() : null,
       emailVerified: user.emailVerified,
       phoneVerified: user.phoneVerified,

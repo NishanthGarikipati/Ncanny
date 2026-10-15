@@ -1,15 +1,21 @@
-import { Body, Controller, Get, Param, Post, Query, Req } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Query, Req } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import type { AccessTokenClaims, AcademicHall, MediaPayload, PaginatedResult, StoredMedia, WorkCard, WorkDetail } from '@ncanny/types';
+import type { AccessTokenClaims, AcademicHall, MediaPayload, PaginatedResult, SchoolWorkCounts, StoredMedia, WorkCard, WorkDetail } from '@ncanny/types';
 import {
+  awardBadgeSchema,
+  commentWorkSchema,
   createWorkSchema,
   presenceSchema,
+  reactionSchema,
   reportWorkSchema,
   reviewWorkSchema,
   uploadMediaSchema,
   workFeedSchema,
+  type AwardBadgeInput,
+  type CommentWorkInput,
   type CreateWorkInput,
   type PresenceInput,
+  type ReactionInput,
   type ReportWorkInput,
   type ReviewWorkInput,
   type UploadMediaInput,
@@ -69,6 +75,12 @@ export class ContentController {
     return this.content.mine(claims);
   }
 
+  @Get('content/summary')
+  @ApiOperation({ summary: 'Published school work counts for the school page' })
+  summary(@CurrentUser() claims: AccessTokenClaims): Promise<SchoolWorkCounts> {
+    return this.content.schoolCounts(claims);
+  }
+
   @Get('content/:id')
   @ApiOperation({ summary: 'One piece of work, if the viewer is allowed to see it' })
   byId(
@@ -93,6 +105,59 @@ export class ContentController {
     @Req() request: NcannyRequest,
   ): Promise<WorkDetail> {
     return this.content.review(id, claims, body, auditOf(request));
+  }
+
+  @Post('content/:id/reactions')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Toggle a like or a smile on work the viewer can see' })
+  react(
+    @Param('id') id: string,
+    @CurrentUser() claims: AccessTokenClaims,
+    @Body(zodBody(reactionSchema)) body: ReactionInput,
+  ): Promise<WorkDetail> {
+    return this.content.react(id, claims, body);
+  }
+
+  @Post('content/:id/comments')
+  @ApiOperation({ summary: 'Leave a short comment on work the viewer can see' })
+  comment(
+    @Param('id') id: string,
+    @CurrentUser() claims: AccessTokenClaims,
+    @Body(zodBody(commentWorkSchema)) body: CommentWorkInput,
+    @Req() request: NcannyRequest,
+  ): Promise<WorkDetail> {
+    return this.content.comment(id, claims, body, auditOf(request));
+  }
+
+  @Post('content/:id/comments/:commentId/report')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Flag a comment on a visible work' })
+  reportComment(
+    @Param('id') id: string,
+    @Param('commentId') commentId: string,
+    @CurrentUser() claims: AccessTokenClaims,
+    @Body(zodBody(reportWorkSchema)) body: ReportWorkInput,
+    @Req() request: NcannyRequest,
+  ): Promise<{ reported: true }> {
+    return this.content.reportComment(id, commentId, claims, body.reason, auditOf(request));
+  }
+
+  @Post('content/:id/bookmark')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Save or unsave a piece of work' })
+  bookmark(@Param('id') id: string, @CurrentUser() claims: AccessTokenClaims): Promise<WorkDetail> {
+    return this.content.bookmark(id, claims);
+  }
+
+  @Post('content/:id/badges')
+  @ApiOperation({ summary: 'Award a fixed badge. Preceptors only, and not on their own work.' })
+  awardBadge(
+    @Param('id') id: string,
+    @CurrentUser() claims: AccessTokenClaims,
+    @Body(zodBody(awardBadgeSchema)) body: AwardBadgeInput,
+    @Req() request: NcannyRequest,
+  ): Promise<WorkDetail> {
+    return this.content.awardBadge(id, claims, body, auditOf(request));
   }
 
   @Post('content/:id/report')

@@ -8,7 +8,9 @@ import type {
   PaginatedResult,
   PreceptorProfile,
   ScholarProfile,
+  SchoolRoster,
   SchoolSummary,
+  SchoolWorkCounts,
   SessionSummary,
   StoredMedia,
   Subject,
@@ -16,13 +18,17 @@ import type {
   WorkDetail,
 } from '@ncanny/types';
 import type {
+  AwardBadgeInput,
+  CommentWorkInput,
   CreateWorkInput,
+  ChangePasswordInput,
   LoginInput,
   OtpRequestInput,
   OtpVerifyInput,
   PresenceInput,
   RegisterPreceptorInput,
   RegisterScholarInput,
+  ReactionInput,
   ReportWorkInput,
   ReviewWorkInput,
   UpdatePreceptorProfileInput,
@@ -87,6 +93,9 @@ export class NcannyClient {
       this.http.post<{ loggedOut: true }>('/api/v1/auth/logout', { refreshToken }),
 
     logoutAll: () => this.http.post<{ revokedSessions: number }>('/api/v1/auth/logout-all'),
+
+    changePassword: (input: ChangePasswordInput, options: Cancellable = {}) =>
+      this.http.post<{ changed: true }>('/api/v1/auth/password', input, options),
   };
 
   // ------------------------------------------------------------ profiles
@@ -128,6 +137,9 @@ export class NcannyClient {
         ...options,
         anonymous: true,
       }),
+
+    roster: (options: Cancellable = {}) =>
+      this.http.get<SchoolRoster>('/api/v1/scholars/school-roster', options),
   };
 
   readonly subjects = {
@@ -149,6 +161,9 @@ export class NcannyClient {
 
     mine: (options: Cancellable = {}) => this.http.get<WorkCard[]>('/api/v1/content/mine', options),
 
+    summary: (options: Cancellable = {}) =>
+      this.http.get<SchoolWorkCounts>('/api/v1/content/summary', options),
+
     byId: (id: string, options: Cancellable = {}) =>
       this.http.get<WorkDetail>(`/api/v1/content/${encodeURIComponent(id)}`, options),
 
@@ -164,6 +179,25 @@ export class NcannyClient {
         input,
         options,
       ),
+
+    react: (id: string, input: ReactionInput, options: Cancellable = {}) =>
+      this.http.post<WorkDetail>(`/api/v1/content/${encodeURIComponent(id)}/reactions`, input, options),
+
+    comment: (id: string, input: CommentWorkInput, options: Cancellable = {}) =>
+      this.http.post<WorkDetail>(`/api/v1/content/${encodeURIComponent(id)}/comments`, input, options),
+
+    reportComment: (id: string, commentId: string, input: ReportWorkInput, options: Cancellable = {}) =>
+      this.http.post<{ reported: true }>(
+        `/api/v1/content/${encodeURIComponent(id)}/comments/${encodeURIComponent(commentId)}/report`,
+        input,
+        options,
+      ),
+
+    bookmark: (id: string, options: Cancellable = {}) =>
+      this.http.post<WorkDetail>(`/api/v1/content/${encodeURIComponent(id)}/bookmark`, {}, options),
+
+    awardBadge: (id: string, input: AwardBadgeInput, options: Cancellable = {}) =>
+      this.http.post<WorkDetail>(`/api/v1/content/${encodeURIComponent(id)}/badges`, input, options),
   };
 
   readonly whiteboard = {

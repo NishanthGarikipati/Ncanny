@@ -11,6 +11,7 @@ import {
   type SessionSummary,
 } from '@ncanny/types';
 import type {
+  ChangePasswordInput,
   LoginInput,
   OtpVerifyInput,
   RegisterPreceptorInput,
@@ -88,6 +89,7 @@ export class AuthService {
       cannyId,
       fullName: input.fullName,
       avatarUrl: input.avatarUrl,
+      avatarPreset: input.avatarPreset,
       schoolId: school._id,
     });
 
@@ -137,6 +139,7 @@ export class AuthService {
       cannyId,
       fullName: input.fullName,
       avatarUrl: input.avatarUrl,
+      avatarPreset: input.avatarPreset,
       schoolId: school._id,
     });
 
@@ -327,6 +330,39 @@ export class AuthService {
 
   async listSessions(userId: string, currentSessionId: string): Promise<SessionSummary[]> {
     return this.sessionsService.listForUser(new Types.ObjectId(userId), currentSessionId);
+  }
+
+  async changePassword(
+    userId: string,
+    sessionId: string,
+    input: ChangePasswordInput,
+    context: RequestContext = {},
+  ): Promise<{ changed: true }> {
+    const user = await this.usersService.findByIdWithPassword(userId);
+    if (!user) {
+      throw AppException.unauthenticated('Authentication is required', ErrorCode.UNAUTHENTICATED);
+    }
+    const matches = await this.passwordService.verify(input.currentPassword, user.passwordHash);
+    if (!matches) {
+      throw AppException.unauthenticated(
+        'The current password is incorrect.',
+        ErrorCode.INVALID_CREDENTIALS,
+      );
+    }
+    if (input.currentPassword === input.newPassword) {
+      throw AppException.badRequest('Choose a password you have not used before.');
+    }
+    await this.usersService.setPasswordHash(user._id, await this.passwordService.hash(input.newPassword));
+    await this.sessionsService.revokeOthersForUser(user._id, sessionId);
+    await this.auditService.record({
+      action: AuditAction.PASSWORD_CHANGED,
+      actorId: userId,
+      resourceType: 'User',
+      resourceId: userId,
+      success: true,
+      ...context,
+    });
+    return { changed: true };
   }
 
   async getCurrentUser(userId: string): Promise<CurrentUser> {

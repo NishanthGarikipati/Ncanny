@@ -2,11 +2,13 @@
 
 import { UserRole, type WorkDetail } from '@ncanny/types';
 import { Alert, Button, FormField, Input, Textarea } from '@ncanny/ui';
-import { reviewWorkSchema, reportWorkSchema } from '@ncanny/validation';
+import { commentWorkSchema, reportWorkSchema, reviewWorkSchema } from '@ncanny/validation';
 import { useEffect, useState } from 'react';
 import { getApiClient } from '../../lib/api';
 import { useAuthStore } from '../../lib/auth-store';
 import { MarkStars, Portrait } from '../neon';
+import { EngagementBar } from './EngagementBar';
+import { ElocutionStage } from './ElocutionStage';
 import { FORM_ERROR, parseForm, toFormErrors, type FieldErrors } from '../../lib/form';
 
 export function WorkReader({ work, onClose }: { work: WorkDetail; onClose?: () => void }) {
@@ -15,6 +17,8 @@ export function WorkReader({ work, onClose }: { work: WorkDetail; onClose?: () =
   const [current, setCurrent] = useState(work);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [reported, setReported] = useState(false);
+  const [comment, setComment] = useState('');
+  const [reportingComment, setReportingComment] = useState<string | null>(null);
 
   useEffect(() => {
     setCurrent(work);
@@ -71,8 +75,24 @@ export function WorkReader({ work, onClose }: { work: WorkDetail; onClose?: () =
     }
   };
 
+  const submitComment = async () => {
+    const parsed = parseForm(commentWorkSchema, { body: comment });
+    if (!parsed.ok) {
+      setErrors(parsed.errors);
+      return;
+    }
+    try {
+      setCurrent(await getApiClient().content.comment(current.id, parsed.data));
+      setComment('');
+      setErrors({});
+    } catch (error) {
+      setErrors(toFormErrors(error));
+    }
+  };
+
   const heading =
     current.type === 'ELOCUTION' ? 'Elocution' : current.type === 'ESSAY' ? 'Essay Writing' : current.type.replaceAll('_', ' ');
+  const posted = new Date(current.createdAt).toLocaleDateString();
 
   return (
     <article className="hud-frame flex flex-col gap-4 p-4 sm:p-6">
@@ -91,6 +111,7 @@ export function WorkReader({ work, onClose }: { work: WorkDetail; onClose?: () =
           <p className="mt-2 font-semibold text-content">{current.authorName}</p>
           <p className="font-mono text-xs text-content-muted">{current.authorCannyId}</p>
           <p className="mt-1 text-xs text-content-muted">{current.subjectName}</p>
+          <p className="mt-1 text-xs text-content-muted">{posted}</p>
           <div className="mt-2">
             <MarkStars score={current.review?.score} />
           </div>
@@ -105,21 +126,92 @@ export function WorkReader({ work, onClose }: { work: WorkDetail; onClose?: () =
           <img src={mediaUrl} alt={current.title} className="mt-3 max-h-96 w-full rounded-lg object-contain" />
         </div>
       )}
-      {mediaUrl && current.mediaKind === 'AUDIO' && (
-        <div className="stage">
-          <p className="kicker">Play</p>
-          <audio controls src={mediaUrl} className="mt-3 w-full" />
-        </div>
-      )}
+      {mediaUrl && current.mediaKind === 'AUDIO' && <ElocutionStage src={mediaUrl} title={current.title} />}
 
       {current.body && <div className="reading-well whitespace-pre-wrap text-content">{current.body}</div>}
       {current.summary && !current.body && <p className="text-sm text-content">{current.summary}</p>}
+
+      <EngagementBar
+        work={current}
+        ownedByViewer={current.ownedByViewer}
+        onUpdated={(detail) => setCurrent(detail)}
+      />
 
       {current.review && (
         <Alert tone="info" title={`Feedback from ${current.review.reviewerName}`}>
           {current.review.feedback}
         </Alert>
       )}
+
+      <section id="comments" className="flex flex-col gap-3 border-t border-border pt-3">
+        <h4 className="font-display text-lg text-content">Comments</h4>
+        {current.comments.length === 0 ? (
+          <p className="text-sm text-content-muted">No comments yet. Notes stay on this work. They are not private messages.</p>
+        ) : (
+          <ul className="flex flex-col gap-2">
+            {current.comments.map((note) => (
+              <li key={note.id} className="rounded-xl border border-primary/40 bg-surface-sunken px-3 py-2">
+                <p className="text-sm font-semibold text-content">
+                  {note.authorName}{' '}
+                  <span className="font-mono text-xs font-normal text-content-muted">{note.authorCannyId}</span>
+                </p>
+                <p className="mt-1 whitespace-pre-wrap text-sm text-content">{note.body}</p>
+                {note.authorCannyId !== viewer?.cannyId && reportingComment !== note.id && (
+                  <button
+                    type="button"
+                    className="mt-1 text-xs text-content-muted underline"
+                    onClick={() => setReportingComment(note.id)}
+                  >
+                    Report comment
+                  </button>
+                )}
+                {reportingComment === note.id && (
+                  <form
+                    className="mt-2 flex flex-col gap-2"
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      const reason = String(new FormData(event.currentTarget).get('commentReason') ?? '');
+                      const parsed = parseForm(reportWorkSchema, { reason });
+                      if (!parsed.ok) {
+                        setErrors(parsed.errors);
+                        return;
+                      }
+                      void getApiClient()
+                        .content.reportComment(current.id, note.id, parsed.data)
+                        .then(() => {
+                          setReported(true);
+                          setReportingComment(null);
+                        })
+                        .catch((error) => setErrors(toFormErrors(error)));
+                    }}
+                  >
+                    <Input name="commentReason" aria-label="Why are you reporting this comment?" />
+                    <Button type="submit" size="sm" variant="ghost">
+                      Send report
+                    </Button>
+                  </form>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+        <FormField label="Add a comment" error={errors.body}>
+          {({ id, describedBy, invalid }) => (
+            <Textarea
+              id={id}
+              name="comment"
+              value={comment}
+              maxLength={500}
+              aria-describedby={describedBy}
+              invalid={invalid}
+              onChange={(event) => setComment(event.target.value)}
+            />
+          )}
+        </FormField>
+        <Button type="button" variant="accent" onClick={() => void submitComment()}>
+          Comment
+        </Button>
+      </section>
 
       {errors[FORM_ERROR] && <Alert tone="danger">{errors[FORM_ERROR]}</Alert>}
 

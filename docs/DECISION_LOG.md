@@ -287,3 +287,24 @@ not drawn as if they work. Home address stays off the profile. A Preceptor mark 
 
 **Consequences.** The product looks like the references where a real action exists. Empty badges
 stay empty. Light theme remains available.
+
+---
+
+### DL-0020 — Reference actions are real, and only on work the viewer can see
+
+**Context.** DL-0019 matched the neon console and left likes, comments and badges undrawn so they
+would not look finished. The colour was accepted. The missing pieces were the interactions on
+those screens.
+
+**Decision.** A person who can see a school work can like it, smile at it, comment on it (500
+characters), bookmark it, and report a comment. A Preceptor can award shield, star or medal once,
+and cannot award their own work. Counts live on the work. A person's own reaction is stored so
+the button matches, and it is not used as a rank signal. The school page lists the viewer's own
+school: institutional address, classmates who are school-visible, the gallery, and published
+counts. Password change checks the current password and signs out other devices. Avatar choices
+are five geometric marks, not generated faces. Billing, 2FA, language packs and a sign-in role
+switch are not presented as working controls.
+
+**Consequences.** Comments are notes on a visible work, not private messages. Hidden work returns
+the same not-found response as a missing work. Student email, phone and home address stay off
+the school page and the profile.

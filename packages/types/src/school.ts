@@ -1,3 +1,5 @@
+import type { UserRole } from './roles';
+
 export interface Address {
   line1: string;
   line2?: string;
@@ -34,6 +36,25 @@ export interface SchoolSummary {
   verified: boolean;
   scholarCount: number;
   preceptorCount: number;
+}
+
+/** A classmate on the school page. Contact details are never included. */
+export interface RosterMember {
+  cannyId: string;
+  fullName: string;
+  role: UserRole;
+  level: number;
+  badgeCount: number;
+  grade?: string;
+  section?: string;
+  preceptorRole?: string;
+}
+
+/** The signed-in user's own school. Other schools are not listed here. */
+export interface SchoolRoster {
+  school: SchoolSummary;
+  scholars: RosterMember[];
+  preceptors: RosterMember[];
 }
 
 /** Full school representation, returned only to school and platform administrators. */

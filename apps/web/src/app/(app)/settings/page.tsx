@@ -1,10 +1,14 @@
 'use client';
 
 import type { SessionSummary } from '@ncanny/types';
-import { Alert, Badge, Button, Card, CardHeader, LoadingState, useToast } from '@ncanny/ui';
+import { Alert, Badge, Button, Card, CardHeader, FormField, Input, LoadingState, useToast } from '@ncanny/ui';
+import { changePasswordSchema } from '@ncanny/validation';
+import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
+import { ThemeToggle } from '../../../components/ThemeToggle';
 import { getApiClient } from '../../../lib/api';
 import { useAuthStore } from '../../../lib/auth-store';
+import { FORM_ERROR, parseForm, toFormErrors, type FieldErrors } from '../../../lib/form';
 
 /**
  * Settings shell for this milestone: account facts and session management.
@@ -16,6 +20,8 @@ export default function SettingsPage() {
   const { showToast } = useToast();
   const [sessions, setSessions] = useState<SessionSummary[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [passwordErrors, setPasswordErrors] = useState<FieldErrors>({});
+  const [passwordSaved, setPasswordSaved] = useState(false);
 
   const loadSessions = useCallback(async () => {
     try {
@@ -38,6 +44,27 @@ export default function SettingsPage() {
       await signOut();
     } catch {
       showToast({ tone: 'danger', title: 'Could not sign out everywhere' });
+    }
+  };
+
+  const changePassword = async (form: FormData) => {
+    const parsed = parseForm(changePasswordSchema, {
+      currentPassword: form.get('currentPassword'),
+      newPassword: form.get('newPassword'),
+    });
+    if (!parsed.ok) {
+      setPasswordErrors(parsed.errors);
+      setPasswordSaved(false);
+      return;
+    }
+    try {
+      await getApiClient().auth.changePassword(parsed.data);
+      setPasswordErrors({});
+      setPasswordSaved(true);
+      showToast({ tone: 'success', title: 'Password updated. Other devices were signed out.' });
+    } catch (cause) {
+      setPasswordSaved(false);
+      setPasswordErrors(toFormErrors(cause));
     }
   };
 
@@ -114,6 +141,54 @@ export default function SettingsPage() {
           <Button variant="accent" onClick={() => void signOutEverywhere()}>
             Sign out everywhere
           </Button>
+        </div>
+      </Card>
+
+      <Card className="border-2 border-primary shadow-hud">
+        <CardHeader title="Password" description="Your current password is checked before the new one is stored." />
+        <form
+          className="mt-4 flex flex-col gap-3"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void changePassword(new FormData(event.currentTarget));
+            event.currentTarget.reset();
+          }}
+        >
+          {passwordSaved && <Alert tone="success">Password updated.</Alert>}
+          {passwordErrors[FORM_ERROR] && <Alert tone="danger">{passwordErrors[FORM_ERROR]}</Alert>}
+          <FormField label="Current password" error={passwordErrors.currentPassword}>
+            {({ id, describedBy, invalid }) => (
+              <Input id={id} name="currentPassword" type="password" autoComplete="current-password" aria-describedby={describedBy} invalid={invalid} />
+            )}
+          </FormField>
+          <FormField label="New password" error={passwordErrors.newPassword}>
+            {({ id, describedBy, invalid }) => (
+              <Input id={id} name="newPassword" type="password" autoComplete="new-password" aria-describedby={describedBy} invalid={invalid} />
+            )}
+          </FormField>
+          <Button type="submit">Change password</Button>
+        </form>
+      </Card>
+
+      <Card className="border-2 border-primary shadow-hud">
+        <CardHeader title="School and content" />
+        <div className="mt-4 flex flex-col gap-2 text-sm">
+          <Link href="/school" className="font-semibold text-primary">
+            Open your school
+          </Link>
+          <Link href="/activity" className="font-semibold text-primary">
+            Your published work
+          </Link>
+          <Link href="/create" className="font-semibold text-primary">
+            Upload a new piece
+          </Link>
+          <Link href={user.cannyId ? `/profile/${user.cannyId}` : '/profile'} className="font-semibold text-primary">
+            Privacy and profile
+          </Link>
+        </div>
+        <div className="mt-4 flex items-center justify-between gap-3">
+          <p className="text-sm text-content-muted">Theme. Motion follows the setting on your device.</p>
+          <ThemeToggle />
         </div>
       </Card>
       </div>

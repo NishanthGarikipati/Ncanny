@@ -1,8 +1,10 @@
 import { z } from 'zod';
 import {
+  BadgeKey,
   ContentStatus,
   ContentType,
   PRECEPTOR_CONTENT_TYPES,
+  ReactionKind,
   SCHOLAR_CONTENT_TYPES,
 } from '@ncanny/types';
 import { objectIdSchema, paginationSchema, visibilitySchema } from './common';
@@ -98,6 +100,18 @@ export const presenceSchema = z.object({
   optedIn: z.boolean(),
 });
 
+export const reactionSchema = z.object({
+  kind: z.enum([ReactionKind.LIKE, ReactionKind.SMILE]),
+});
+
+export const commentWorkSchema = z.object({
+  body: z.string().trim().min(1, 'Write a comment').max(500, 'Keep the comment under 500 characters'),
+});
+
+export const awardBadgeSchema = z.object({
+  key: z.enum([BadgeKey.SHIELD, BadgeKey.STAR, BadgeKey.MEDAL]),
+});
+
 export const SCHOLAR_WORK_TYPES = SCHOLAR_CONTENT_TYPES;
 export const PRECEPTOR_WORK_TYPES = PRECEPTOR_CONTENT_TYPES;
 
@@ -107,3 +121,6 @@ export type WorkFeedInput = z.infer<typeof workFeedSchema>;
 export type ReviewWorkInput = z.infer<typeof reviewWorkSchema>;
 export type ReportWorkInput = z.infer<typeof reportWorkSchema>;
 export type PresenceInput = z.infer<typeof presenceSchema>;
+export type ReactionInput = z.infer<typeof reactionSchema>;
+export type CommentWorkInput = z.infer<typeof commentWorkSchema>;
+export type AwardBadgeInput = z.infer<typeof awardBadgeSchema>;

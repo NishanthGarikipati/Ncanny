@@ -11,6 +11,8 @@ import {
   urlSchema,
 } from './common';
 
+export const avatarPresetSchema = z.enum(['crest', 'book', 'quill', 'lantern', 'compass']);
+
 /**
  * A school is identified either by an existing id or by name + address, which
  * provisions an unverified school record (see DL-0011).
@@ -49,6 +51,7 @@ export const registerScholarSchema = passwordsMatch(
     .object({
       fullName: fullNameSchema,
       avatarUrl: urlSchema.optional(),
+      avatarPreset: avatarPresetSchema.optional(),
       grade: gradeSchema,
       section: z.string().trim().max(10).optional(),
       subjectIds: subjectIdList(1, 'Select at least one subject you are studying'),
@@ -63,6 +66,7 @@ export const registerPreceptorSchema = passwordsMatch(
     .object({
       fullName: fullNameSchema,
       avatarUrl: urlSchema.optional(),
+      avatarPreset: avatarPresetSchema.optional(),
       preceptorRole: z.string().trim().max(80).optional(),
       teachingSubjectIds: subjectIdList(1, 'Select at least one subject you teach'),
       knowledgeAreas: z
@@ -98,6 +102,11 @@ export const refreshTokenSchema = z.object({
   refreshToken: z.string().min(20, 'Invalid refresh token').max(512),
 });
 
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, 'Enter your current password').max(128),
+  newPassword: passwordSchema,
+});
+
 export const cannyIdParamSchema = z.object({
   cannyId: cannyIdSchema,
 });
@@ -108,3 +117,4 @@ export type LoginInput = z.infer<typeof loginSchema>;
 export type OtpRequestInput = z.infer<typeof otpRequestSchema>;
 export type OtpVerifyInput = z.infer<typeof otpVerifySchema>;
 export type RefreshTokenInput = z.infer<typeof refreshTokenSchema>;
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;

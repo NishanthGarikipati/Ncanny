@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Patch, Req } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
-import { UserRole, type AccessTokenClaims, type ScholarProfile } from '@ncanny/types';
+import { UserRole, type AccessTokenClaims, type ScholarProfile, type SchoolRoster } from '@ncanny/types';
 import {
   cannyIdParamSchema,
   updateScholarProfileSchema,
@@ -46,6 +46,16 @@ export class ScholarsController {
       ipAddress: getClientIp(request),
       userAgent: getUserAgent(request),
     });
+  }
+
+  @Get('school-roster')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: "People at the signed-in user's school",
+    description: 'Names, Canny IDs, class and badges only. Email, phone and home address are omitted.',
+  })
+  async schoolRoster(@CurrentUser() claims: AccessTokenClaims): Promise<SchoolRoster> {
+    return this.profilesService.schoolRoster(claims);
   }
 
   @Public()

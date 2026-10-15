@@ -8,12 +8,15 @@ import { getApiClient } from '../../lib/api';
 import { WorkPlaque } from './WorkPlaque';
 
 const FILTERS = [
-  { id: 'all', label: 'All work', type: null },
-  { id: 'essays', label: 'Essays', type: ContentType.ESSAY },
-  { id: 'paintings', label: 'Paintings', type: ContentType.PAINTING },
-  { id: 'elocution', label: 'Elocution', type: ContentType.ELOCUTION },
-  { id: 'study', label: 'Study activities', type: ContentType.STUDY_ACTIVITY },
-  { id: 'faculty', label: 'Faculty', type: ContentType.TEACHER_PRESENTATION },
+  { id: 'all', label: 'All work' },
+  { id: 'videos', label: 'Videos' },
+  { id: 'essays', label: 'Essays' },
+  { id: 'comment', label: 'Comment' },
+  { id: 'badge', label: 'Badge' },
+  { id: 'rank', label: 'Rank' },
+  { id: 'paintings', label: 'Paintings' },
+  { id: 'elocution', label: 'Elocution' },
+  { id: 'study', label: 'Study activities' },
 ] as const;
 
 type FilterId = (typeof FILTERS)[number]['id'];
@@ -38,17 +41,10 @@ export function Campus() {
     return () => controller.abort();
   }, []);
 
-  const active = FILTERS.find((item) => item.id === filter) ?? FILTERS[0];
   const works = useMemo(() => {
     if (!hall) return [];
-    if (!active.type) return hall.works;
-    if (active.id === 'faculty') {
-      return hall.works.filter(
-        (work) => work.type === ContentType.TEACHER_PRESENTATION || work.type === ContentType.TEACHER_VIDEO,
-      );
-    }
-    return hall.works.filter((work) => work.type === active.type);
-  }, [active, hall]);
+    return hall.works.filter((work) => matchesFilter(filter, work));
+  }, [filter, hall]);
 
   const setPresence = async (optedIn: boolean) => {
     const result = await getApiClient().whiteboard.setPresence({ optedIn });
@@ -114,14 +110,7 @@ export function Campus() {
           <p className="kicker px-2 pt-1">Board</p>
           <div role="tablist" aria-label="Work types" className="flex flex-col gap-2">
             {FILTERS.map((item) => {
-              const count =
-                !item.type
-                  ? hall.works.length
-                  : item.id === 'faculty'
-                    ? hall.works.filter(
-                        (work) => work.type === ContentType.TEACHER_PRESENTATION || work.type === ContentType.TEACHER_VIDEO,
-                      ).length
-                    : hall.works.filter((work) => work.type === item.type).length;
+              const count = hall.works.filter((work) => matchesFilter(item.id, work)).length;
               const selected = filter === item.id;
               return (
                 <button
@@ -146,6 +135,20 @@ export function Campus() {
       </div>
     </div>
   );
+}
+
+function matchesFilter(filter: FilterId, work: AcademicHall['works'][number]): boolean {
+  if (filter === 'all') return true;
+  if (filter === 'videos') {
+    return work.type === ContentType.ELOCUTION || work.type === ContentType.TEACHER_VIDEO || work.mediaKind === 'VIDEO';
+  }
+  if (filter === 'essays') return work.type === ContentType.ESSAY;
+  if (filter === 'paintings') return work.type === ContentType.PAINTING;
+  if (filter === 'elocution') return work.type === ContentType.ELOCUTION;
+  if (filter === 'study') return work.type === ContentType.STUDY_ACTIVITY;
+  if (filter === 'comment') return work.engagement.commentCount > 0;
+  if (filter === 'badge') return work.engagement.badges.length > 0;
+  return work.review != null;
 }
 
 function Classmate({ person }: { person: HallPresence }) {

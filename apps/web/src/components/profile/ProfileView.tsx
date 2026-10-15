@@ -25,7 +25,7 @@ import {
 import { useCallback, useEffect, useState } from 'react';
 import { getApiClient } from '../../lib/api';
 import { useAuthStore } from '../../lib/auth-store';
-import { MarkStars, Portrait } from '../neon';
+import { BadgeMark, Portrait } from '../neon';
 import { WorkPlaque } from '../content/WorkPlaque';
 import { ProfileEditor } from './ProfileEditor';
 
@@ -122,6 +122,10 @@ export function ProfileView({ cannyId }: { cannyId: string }) {
   const shelf = works.filter((work) => work.type === shelfType[contentTab]);
 
   const xpWidth = profile.progression.xp <= 0 ? 0 : Math.min(100, profile.progression.xp % 100 || 100);
+  const smileys = works.reduce((total, work) => total + work.engagement.smileCount, 0);
+  const comments = works.reduce((total, work) => total + work.engagement.commentCount, 0);
+  const feedback = works.filter((work) => work.review);
+  const badgeKeys = [...new Set(works.flatMap((work) => work.engagement.badges.map((badge) => badge.key)))];
   const classLine = scholar
     ? [GRADE_LABELS[profile.grade], profile.section && `Section ${profile.section}`].filter(Boolean).join(' · ')
     : preceptor.preceptorRole;
@@ -134,7 +138,7 @@ export function ProfileView({ cannyId }: { cannyId: string }) {
         </div>
         <div className="mt-5 grid gap-5 lg:grid-cols-[16rem_1fr]">
           <aside className="flex flex-col items-center rounded-2xl border border-primary/40 bg-surface-sunken/70 p-4">
-            <Portrait name={profile.fullName} src={profile.avatarUrl} />
+            <Portrait name={profile.fullName} src={profile.avatarUrl} preset={profile.avatarPreset} />
             <p className="id-plate w-full text-sm">Canny ID</p>
             <p className="mt-2 font-mono text-sm text-content">{profile.cannyId}</p>
             <dl className="mt-4 w-full space-y-3 text-sm">
@@ -221,15 +225,51 @@ export function ProfileView({ cannyId }: { cannyId: string }) {
             </TabPanel>
             <div className="mt-4 rounded-2xl border border-primary/40 bg-surface-sunken/60 p-4">
               <h2 className="font-display text-lg font-semibold text-content">Class info</h2>
-              <div className="mt-3 flex flex-wrap items-center gap-3">
-                <MarkStars score={profile.progression.badgeCount > 0 ? Math.min(100, profile.progression.badgeCount * 20) : undefined} />
-                <p className="text-sm text-content-muted">
-                  {profile.progression.badgeCount === 0
-                    ? 'No badges yet. A Preceptor awards them.'
-                    : `${profile.progression.badgeCount} badge${profile.progression.badgeCount === 1 ? '' : 's'}`}
-                </p>
-              </div>
+              <p className="mt-3 text-sm text-content-muted">
+                {profile.progression.badgeCount === 0
+                  ? 'No badges yet. A Preceptor awards them on a piece of work.'
+                  : `${profile.progression.badgeCount} badge${profile.progression.badgeCount === 1 ? '' : 's'} from a Preceptor.`}
+              </p>
+              {badgeKeys.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {badgeKeys.map((key) => (
+                    <BadgeMark key={key} badge={key} />
+                  ))}
+                </div>
+              )}
+              {isOwnProfile && (
+                <dl className="mt-3 grid grid-cols-2 gap-2 text-sm">
+                  <div>
+                    <dt className="text-content-muted">Smileys</dt>
+                    <dd className="font-semibold text-content">{smileys}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-content-muted">Comments</dt>
+                    <dd className="font-semibold text-content">{comments}</dd>
+                  </div>
+                </dl>
+              )}
             </div>
+            {isOwnProfile && (
+              <div className="mt-4 rounded-2xl border border-primary/40 bg-surface-sunken/60 p-4">
+                <h2 className="font-display text-lg font-semibold text-content">Feedback</h2>
+                {feedback.length === 0 ? (
+                  <p className="mt-2 text-sm text-content-muted">A Preceptor&apos;s note on your work shows up here.</p>
+                ) : (
+                  <ul className="mt-3 flex flex-col gap-3">
+                    {feedback.map((work) => (
+                      <li key={work.id} className="text-sm">
+                        <p className="font-semibold text-content">{work.title}</p>
+                        <p className="text-content">{work.review?.feedback}</p>
+                        <p className="text-xs text-content-muted">
+                          {work.review?.reviewerName} · {work.review?.score}/100
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </section>

@@ -6,11 +6,14 @@ import {
   ContentType,
   ErrorCode,
   UserRole,
+  Visibility,
   type AccessTokenClaims,
+  type AvatarPreset,
   type GradeLevel,
   type PreceptorProfile as PreceptorProfileDto,
+  type RosterMember,
   type ScholarProfile as ScholarProfileDto,
-  type Visibility,
+  type SchoolRoster,
 } from '@ncanny/types';
 import type { UpdatePreceptorProfileInput, UpdateScholarProfileInput } from '@ncanny/validation';
 import { AnalyticsService } from '../common/analytics/analytics.service';
@@ -262,14 +265,19 @@ export class ProfilesService {
 
   private async applyIdentityUpdates(
     userId: Types.ObjectId,
-    updates: { fullName?: string; avatarUrl?: string | null },
+    updates: { fullName?: string; avatarUrl?: string | null; avatarPreset?: AvatarPreset },
   ): Promise<void> {
-    if (updates.fullName === undefined && updates.avatarUrl === undefined) {
+    if (
+      updates.fullName === undefined &&
+      updates.avatarUrl === undefined &&
+      updates.avatarPreset === undefined
+    ) {
       return;
     }
     await this.usersService.updateIdentityFields(userId, {
       fullName: updates.fullName,
       avatarUrl: updates.avatarUrl,
+      avatarPreset: updates.avatarPreset,
     });
   }
 
@@ -319,6 +327,7 @@ export class ProfilesService {
       role: UserRole.SCHOLAR,
       fullName: user.fullName,
       avatarUrl: user.avatarUrl,
+      avatarPreset: user.avatarPreset,
       bio: profile.bio,
       school: toSchoolSummary(school),
       visibility: profile.visibility,
@@ -355,6 +364,7 @@ export class ProfilesService {
       role: UserRole.PRECEPTOR,
       fullName: user.fullName,
       avatarUrl: user.avatarUrl,
+      avatarPreset: user.avatarPreset,
       bio: profile.bio,
       school: toSchoolSummary(school),
       visibility: profile.visibility,
@@ -404,6 +414,64 @@ export class ProfilesService {
       { userId: new Types.ObjectId(userId) },
       { $inc: { 'interactionStats.contentUploaded': 1 } },
     );
+  }
+
+  async recordBadgeAward(awarderUserId: string, recipientUserId: string): Promise<void> {
+    const recipient = new Types.ObjectId(recipientUserId);
+    const awarder = new Types.ObjectId(awarderUserId);
+    await Promise.all([
+      this.scholarModel.updateOne({ userId: recipient }, { $inc: { 'progression.badgeCount': 1 } }),
+      this.preceptorModel.updateOne({ userId: recipient }, { $inc: { 'progression.badgeCount': 1 } }),
+      this.preceptorModel.updateOne(
+        { userId: awarder },
+        { $inc: { 'interactionStats.badgesAwarded': 1 } },
+      ),
+    ]);
+  }
+
+  /**
+   * People at the viewer's school who chose to be seen there.
+   * Private profiles stay off the list. Contact fields are not loaded.
+   */
+  async schoolRoster(claims: AccessTokenClaims): Promise<SchoolRoster> {
+    if (!claims.schoolId) {
+      throw AppException.notFound('No school is available.', ErrorCode.SCHOOL_NOT_FOUND);
+    }
+    const school = await this.schoolsService.findByIdOrFail(claims.schoolId);
+    const schoolId = new Types.ObjectId(claims.schoolId);
+    const visible = {
+      $or: [
+        { visibility: { $in: [Visibility.SCHOOL, Visibility.PUBLIC] } },
+        { userId: new Types.ObjectId(claims.sub) },
+      ],
+    };
+    const [scholars, preceptors] = await Promise.all([
+      this.scholarModel.find({ schoolId, ...visible }).limit(80),
+      this.preceptorModel.find({ schoolId, ...visible }).limit(40),
+    ]);
+    const users = await this.usersService.findByIds([
+      ...scholars.map((row) => row.userId),
+      ...preceptors.map((row) => row.userId),
+    ]);
+    const names = new Map(users.map((user) => [user._id.toString(), user.fullName]));
+    const scholarRows: RosterMember[] = scholars.map((row) => ({
+      cannyId: row.cannyId,
+      fullName: names.get(row.userId.toString()) ?? 'Scholar',
+      role: UserRole.SCHOLAR,
+      level: row.progression?.level ?? 1,
+      badgeCount: row.progression?.badgeCount ?? 0,
+      grade: row.grade,
+      section: row.section,
+    }));
+    const preceptorRows: RosterMember[] = preceptors.map((row) => ({
+      cannyId: row.cannyId,
+      fullName: names.get(row.userId.toString()) ?? 'Preceptor',
+      role: UserRole.PRECEPTOR,
+      level: row.progression?.level ?? 1,
+      badgeCount: row.progression?.badgeCount ?? 0,
+      preceptorRole: row.preceptorRole,
+    }));
+    return { school: toSchoolSummary(school), scholars: scholarRows, preceptors: preceptorRows };
   }
 
   async recordPreceptorReview(userId: string): Promise<void> {

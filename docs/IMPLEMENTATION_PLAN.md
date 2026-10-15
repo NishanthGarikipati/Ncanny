@@ -143,9 +143,9 @@ progress are visible.*
 - [x] F4.1 `media_assets` plus local disk storage (`MEDIA_ROOT`). Declared MIME is checked against magic bytes and size. Reads are authenticated base64, so a file is not a public URL. S3 signed upload, thumbnails, virus scan, and upload progress are not built (`DL-0015`).
 - [x] F4.2 `works` for essay, painting, elocution, study activity, teaching notes and teaching audio, with visibility and status. Create and view only. Edit and delete are not built.
 - [x] F4.3 Create flow on the web (kind, writing or file, subject, visibility, publish) and on mobile for writing. No separate preview step. Topics are not collected.
-- [ ] F4.4 Engagement: comments, likes, peer feedback.
-- [x] F4.5 Preceptor review: score and written feedback, audited. Badge award is not built. This is not AI grading.
-- [x] TEST: content e2e covers school visibility, private work hidden from a schoolmate, preceptor-only review, rejected image bytes, and hall presence that does not include an email.
+- [x] F4.4 Engagement on a visible school work: like, smile, comment (500 characters, reportable), bookmark. Not direct messages. A person's own like is stored and is not a rank signal.
+- [x] F4.5 Preceptor review: score and written feedback, audited. A Preceptor can award shield, star or medal once per work, not on their own work. This is not AI grading.
+- [x] TEST: content e2e covers school visibility, private work hidden from a schoolmate, preceptor-only review, rejected image bytes, hall presence that does not include an email, reactions and comments blocked for another school, badge rules, the school roster, and password change.
 
 ## EPIC 5 — Academic Feed (Phase 5) — partial
 

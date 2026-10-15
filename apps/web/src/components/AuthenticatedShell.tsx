@@ -14,6 +14,7 @@ const NAV = [
   { id: 'explore', label: 'Campus', href: '/explore' },
   { id: 'create', label: 'Create', href: '/create' },
   { id: 'activity', label: 'Quests', href: '/activity' },
+  { id: 'school', label: 'School', href: '/school' },
   { id: 'profile', label: 'Character', href: '/profile' },
 ] as const;
 
@@ -169,6 +170,7 @@ function NavMark({ id }: { id: string }) {
     explore: <path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11zM12 10.5h.01" />,
     create: <path d="M12 5v14M5 12h14" />,
     activity: <path d="M5 19V9M12 19V5M19 19v-7" />,
+    school: <path d="M4 20V9l8-5 8 5v11M9 20v-6h6v6" />,
     profile: <path d="M12 12a3.5 3.5 0 1 0-3.5-3.5A3.5 3.5 0 0 0 12 12zm-6 8a6 6 0 0 1 12 0" />,
   };
   return (

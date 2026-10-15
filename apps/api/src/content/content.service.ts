@@ -8,17 +8,20 @@ import {
   ErrorCode,
   ModerationStatus,
   PRECEPTOR_CONTENT_TYPES,
+  ReactionKind,
   SCHOLAR_CONTENT_TYPES,
   UserRole,
   type AcademicHall,
   type AccessTokenClaims,
   type MediaPayload,
   type PaginatedResult,
+  type SchoolWorkCounts,
   type StoredMedia,
   type WorkCard,
+  type WorkComment,
   type WorkDetail,
 } from '@ncanny/types';
-import type { CreateWorkInput, ReviewWorkInput, WorkFeedInput } from '@ncanny/validation';
+import type { AwardBadgeInput as AwardBadgeBody, CommentWorkInput, CreateWorkInput, ReactionInput, ReviewWorkInput, WorkFeedInput } from '@ncanny/validation';
 import { AuditAction } from '../audit/audit-log.schema';
 import { AuditService } from '../audit/audit.service';
 
@@ -32,6 +35,14 @@ import { UsersService } from '../identity/users.service';
 import { canViewProfile, type Viewer } from '../profiles/visibility.policy';
 import { ProfilesService } from '../profiles/profiles.service';
 import { SubjectsService } from '../subjects/subjects.service';
+import {
+  WorkBookmark,
+  type WorkBookmarkDocument,
+  WorkCommentRecord,
+  type WorkCommentDocument,
+  WorkReaction,
+  type WorkReactionDocument,
+} from './schemas/engagement.schema';
 import { HallPresenceRecord, type HallPresenceDocument } from './schemas/hall-presence.schema';
 import { MediaAsset, type MediaAssetDocument } from './schemas/media-asset.schema';
 import { Work, type WorkDocument } from './schemas/content.schema';
@@ -46,6 +57,9 @@ export class ContentService {
     @InjectModel(Work.name) private readonly works: Model<WorkDocument>,
     @InjectModel(MediaAsset.name) private readonly media: Model<MediaAssetDocument>,
     @InjectModel(HallPresenceRecord.name) private readonly presence: Model<HallPresenceDocument>,
+    @InjectModel(WorkReaction.name) private readonly reactions: Model<WorkReactionDocument>,
+    @InjectModel(WorkCommentRecord.name) private readonly comments: Model<WorkCommentDocument>,
+    @InjectModel(WorkBookmark.name) private readonly bookmarks: Model<WorkBookmarkDocument>,
     private readonly storage: MediaStorage,
     private readonly users: UsersService,
     private readonly subjects: SubjectsService,
@@ -164,6 +178,35 @@ export class ContentService {
     return this.toDetail(work, claims);
   }
 
+  async schoolCounts(claims: AccessTokenClaims): Promise<SchoolWorkCounts> {
+    const empty: SchoolWorkCounts = {
+      paintings: 0,
+      essays: 0,
+      elocutions: 0,
+      studyActivities: 0,
+      faculty: 0,
+    };
+    if (!claims.schoolId) return empty;
+    const rows = await this.works.aggregate<{ _id: ContentType; count: number }>([
+      {
+        $match: {
+          schoolId: new Types.ObjectId(claims.schoolId),
+          status: ContentStatus.PUBLISHED,
+          visibility: { $in: ['SCHOOL', 'PUBLIC'] },
+        },
+      },
+      { $group: { _id: '$type', count: { $sum: 1 } } },
+    ]);
+    for (const row of rows) {
+      if (row._id === ContentType.PAINTING) empty.paintings = row.count;
+      else if (row._id === ContentType.ESSAY) empty.essays = row.count;
+      else if (row._id === ContentType.ELOCUTION) empty.elocutions = row.count;
+      else if (row._id === ContentType.STUDY_ACTIVITY) empty.studyActivities = row.count;
+      else empty.faculty += row.count;
+    }
+    return empty;
+  }
+
   async feed(claims: AccessTokenClaims, query: WorkFeedInput): Promise<PaginatedResult<WorkCard>> {
     const viewer = this.viewer(claims);
     if (!viewer.schoolId) {
@@ -192,7 +235,7 @@ export class ContentService {
     const hasMore = rows.length > limit;
     const page = hasMore ? rows.slice(0, limit) : rows;
     return {
-      items: page.map((work) => this.toCard(work)),
+      items: await this.present(page, claims),
       nextCursor: hasMore ? (page[page.length - 1]?._id.toString() ?? null) : null,
       hasMore,
     };
@@ -203,7 +246,7 @@ export class ContentService {
       .find({ authorUserId: new Types.ObjectId(claims.sub), status: { $ne: ContentStatus.REMOVED } })
       .sort({ _id: -1 })
       .limit(50);
-    return rows.map((work) => this.toCard(work));
+    return this.present(rows, claims);
   }
 
   async getById(id: string, claims: AccessTokenClaims | undefined): Promise<WorkDetail> {
@@ -304,7 +347,7 @@ export class ContentService {
       this.presence.findOne({ userId: new Types.ObjectId(claims.sub) }),
     ]);
     return {
-      works: works.map((work) => this.toCard(work)),
+      works: await this.present(works, claims),
       presence: people
         .filter((person) => person.userId.toString() !== claims.sub)
         .map((person) => ({
@@ -335,6 +378,158 @@ export class ContentService {
       { upsert: true },
     );
     return { optedIn };
+  }
+
+  async react(id: string, claims: AccessTokenClaims, input: ReactionInput): Promise<WorkDetail> {
+    const work = await this.requireVisible(id, claims);
+    const userId = new Types.ObjectId(claims.sub);
+    const field = input.kind === ReactionKind.LIKE ? 'likeCount' : 'smileCount';
+    const existing = await this.reactions.findOne({ workId: work._id, userId, kind: input.kind });
+    if (existing) {
+      await existing.deleteOne();
+      await this.works.updateOne({ _id: work._id, [field]: { $gt: 0 } }, { $inc: { [field]: -1 } });
+    } else {
+      try {
+        await this.reactions.create({ workId: work._id, userId, kind: input.kind });
+        await this.works.updateOne({ _id: work._id }, { $inc: { [field]: 1 } });
+      } catch (error) {
+        if (!isDuplicateKey(error)) throw error;
+      }
+    }
+    // A person's own reaction is stored so the button matches, and it is not a rank signal.
+    return this.reload(work._id.toString(), claims);
+  }
+
+  async comment(
+    id: string,
+    claims: AccessTokenClaims,
+    input: CommentWorkInput,
+    context: RequestAudit,
+  ): Promise<WorkDetail> {
+    const work = await this.requireVisible(id, claims);
+    const author = await this.users.findByIdOrFail(claims.sub);
+    if (!author.cannyId) {
+      throw AppException.forbidden('A Canny ID is required to comment.');
+    }
+    await this.comments.create({
+      workId: work._id,
+      schoolId: work.schoolId,
+      authorUserId: author._id,
+      authorName: author.fullName,
+      authorCannyId: author.cannyId,
+      authorRole: author.role,
+      body: input.body,
+    });
+    await this.works.updateOne({ _id: work._id }, { $inc: { commentCount: 1 } });
+    await this.audit.record({
+      action: AuditAction.CONTENT_COMMENTED,
+      actorId: claims.sub,
+      resourceType: 'work',
+      resourceId: work._id.toString(),
+      success: true,
+      ...context,
+    });
+    return this.reload(work._id.toString(), claims);
+  }
+
+  async reportComment(
+    workId: string,
+    commentId: string,
+    claims: AccessTokenClaims,
+    reason: string,
+    context: RequestAudit,
+  ): Promise<{ reported: true }> {
+    const work = await this.requireVisible(workId, claims);
+    if (!Types.ObjectId.isValid(commentId)) {
+      throw AppException.notFound('That comment is not on this work.', ErrorCode.CONTENT_NOT_FOUND);
+    }
+    const comment = await this.comments.findOne({ _id: commentId, workId: work._id });
+    if (!comment) {
+      throw AppException.notFound('That comment is not on this work.', ErrorCode.CONTENT_NOT_FOUND);
+    }
+    if (comment.authorUserId.toString() === claims.sub) {
+      throw AppException.badRequest('You cannot report your own comment.');
+    }
+    work.moderationStatus = ModerationStatus.FLAGGED;
+    await work.save();
+    await this.audit.record({
+      action: AuditAction.CONTENT_REPORTED,
+      actorId: claims.sub,
+      resourceType: 'work_comment',
+      resourceId: comment._id.toString(),
+      success: true,
+      reason,
+      metadata: { workId: work._id.toString() },
+      ...context,
+    });
+    return { reported: true };
+  }
+
+  async bookmark(id: string, claims: AccessTokenClaims): Promise<WorkDetail> {
+    const work = await this.requireVisible(id, claims);
+    const userId = new Types.ObjectId(claims.sub);
+    const existing = await this.bookmarks.findOne({ userId, workId: work._id });
+    if (existing) {
+      await existing.deleteOne();
+    } else {
+      try {
+        await this.bookmarks.create({ userId, workId: work._id });
+      } catch (error) {
+        if (!isDuplicateKey(error)) throw error;
+      }
+    }
+    return this.reload(id, claims);
+  }
+
+  async awardBadge(
+    id: string,
+    claims: AccessTokenClaims,
+    input: AwardBadgeBody,
+    context: RequestAudit,
+  ): Promise<WorkDetail> {
+    if (claims.role !== UserRole.PRECEPTOR && claims.role !== UserRole.NCANNY_ADMIN) {
+      throw AppException.forbidden('Only a Preceptor can award a badge.', ErrorCode.INSUFFICIENT_ROLE);
+    }
+    const work = await this.requireVisible(id, claims);
+    if (work.authorUserId.toString() === claims.sub) {
+      throw AppException.forbidden('You cannot award a badge to your own work.');
+    }
+    if (work.badges.some((badge) => badge.key === input.key)) {
+      throw AppException.conflict('That badge is already on this work.');
+    }
+    const awarder = await this.users.findByIdOrFail(claims.sub);
+    if (!awarder.cannyId) {
+      throw AppException.forbidden('A Canny ID is required to award a badge.');
+    }
+    work.badges.push({
+      key: input.key,
+      awardedByUserId: awarder._id,
+      awardedByName: awarder.fullName,
+      awardedByCannyId: awarder.cannyId,
+      awardedAt: new Date(),
+    });
+    await work.save();
+    if (claims.role === UserRole.PRECEPTOR) {
+      await this.profiles.recordBadgeAward(claims.sub, work.authorUserId.toString());
+    }
+    await this.audit.record({
+      action: AuditAction.CONTENT_BADGE_AWARDED,
+      actorId: claims.sub,
+      resourceType: 'work',
+      resourceId: work._id.toString(),
+      success: true,
+      metadata: { badge: input.key },
+      ...context,
+    });
+    return this.toDetail(work, claims);
+  }
+
+  private async reload(id: string, claims: AccessTokenClaims): Promise<WorkDetail> {
+    const fresh = await this.works.findById(id);
+    if (!fresh) {
+      throw AppException.notFound('No work is available with that id.', ErrorCode.CONTENT_NOT_FOUND);
+    }
+    return this.toDetail(fresh, claims);
   }
 
   private async requireVisible(id: string, claims: AccessTokenClaims | undefined): Promise<WorkDocument> {
@@ -391,15 +586,74 @@ export class ContentService {
             reviewedAt: work.review.reviewedAt.toISOString(),
           }
         : undefined,
+      engagement: {
+        likeCount: work.likeCount ?? 0,
+        smileCount: work.smileCount ?? 0,
+        commentCount: work.commentCount ?? 0,
+        badges: (work.badges ?? []).map((badge) => ({
+          key: badge.key,
+          awardedByName: badge.awardedByName,
+          awardedByCannyId: badge.awardedByCannyId,
+          awardedAt: badge.awardedAt.toISOString(),
+        })),
+        viewerLiked: false,
+        viewerSmiled: false,
+        bookmarked: false,
+      },
       createdAt: work.createdAt.toISOString(),
     };
   }
 
-  private toDetail(work: WorkDocument, claims: AccessTokenClaims | undefined): WorkDetail {
+  private async present(works: WorkDocument[], claims?: AccessTokenClaims): Promise<WorkCard[]> {
+    const cards = works.map((work) => this.toCard(work));
+    if (!claims || works.length === 0) return cards;
+    const ids = works.map((work) => work._id);
+    const userId = new Types.ObjectId(claims.sub);
+    const [reactions, bookmarks] = await Promise.all([
+      this.reactions.find({ userId, workId: { $in: ids } }),
+      this.bookmarks.find({ userId, workId: { $in: ids } }),
+    ]);
+    const liked = new Set(
+      reactions.filter((row) => row.kind === ReactionKind.LIKE).map((row) => row.workId.toString()),
+    );
+    const smiled = new Set(
+      reactions.filter((row) => row.kind === ReactionKind.SMILE).map((row) => row.workId.toString()),
+    );
+    const saved = new Set(bookmarks.map((row) => row.workId.toString()));
+    return cards.map((card) => ({
+      ...card,
+      engagement: {
+        ...card.engagement,
+        viewerLiked: liked.has(card.id),
+        viewerSmiled: smiled.has(card.id),
+        bookmarked: saved.has(card.id),
+      },
+    }));
+  }
+
+  private async loadComments(workId: Types.ObjectId): Promise<WorkComment[]> {
+    const rows = await this.comments.find({ workId }).sort({ createdAt: -1 }).limit(20);
+    return rows.reverse().map((row) => ({
+      id: row._id.toString(),
+      authorName: row.authorName,
+      authorCannyId: row.authorCannyId,
+      authorRole: row.authorRole,
+      body: row.body,
+      createdAt: row.createdAt.toISOString(),
+    }));
+  }
+
+  private async toDetail(work: WorkDocument, claims: AccessTokenClaims | undefined): Promise<WorkDetail> {
+    const [card] = await this.present([work], claims);
     return {
-      ...this.toCard(work),
+      ...(card ?? this.toCard(work)),
       body: work.body,
       ownedByViewer: Boolean(claims && claims.sub === work.authorUserId.toString()),
+      comments: await this.loadComments(work._id),
     };
   }
+}
+
+function isDuplicateKey(error: unknown): boolean {
+  return typeof error === 'object' && error !== null && 'code' in error && (error as { code: number }).code === 11000;
 }

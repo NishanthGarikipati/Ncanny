@@ -7,6 +7,7 @@ import {
   Visibility,
   type MediaKind,
 } from '@ncanny/types';
+import { AwardedBadgeRecord, AwardedBadgeSchema } from './engagement.schema';
 
 @Schema({ _id: false })
 class WorkReviewRecord {
@@ -94,6 +95,18 @@ export class Work {
 
   @Prop({ type: WorkReviewSchema })
   review?: WorkReviewRecord;
+
+  @Prop({ type: Number, default: 0, min: 0 })
+  likeCount!: number;
+
+  @Prop({ type: Number, default: 0, min: 0 })
+  smileCount!: number;
+
+  @Prop({ type: Number, default: 0, min: 0 })
+  commentCount!: number;
+
+  @Prop({ type: [AwardedBadgeSchema], default: [] })
+  badges!: AwardedBadgeRecord[];
 
   createdAt!: Date;
   updatedAt!: Date;

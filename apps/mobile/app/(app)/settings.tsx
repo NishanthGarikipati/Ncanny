@@ -1,10 +1,12 @@
 import type { SessionSummary } from '@ncanny/types';
+import { changePasswordSchema } from '@ncanny/validation';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
-import { Banner, Button, Card, Muted, Screen } from '../../src/components/ui';
+import { Banner, Button, Card, Muted, Screen, TextField } from '../../src/components/ui';
 import { getApiClient } from '../../src/lib/api';
 import { useAuthStore } from '../../src/lib/auth-store';
+import { FORM_ERROR, parseForm, toFormErrors, type FieldErrors } from '../../src/lib/form';
 import { useTheme } from '../../src/theme/theme';
 
 export default function SettingsScreen() {
@@ -15,6 +17,9 @@ export default function SettingsScreen() {
   const [sessions, setSessions] = useState<SessionSummary[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [passwordErrors, setPasswordErrors] = useState<FieldErrors>({});
 
   const load = useCallback(async () => {
     try {
@@ -29,6 +34,23 @@ export default function SettingsScreen() {
   }, [load]);
 
   if (!user) return null;
+
+  const changePassword = async () => {
+    const parsed = parseForm(changePasswordSchema, { currentPassword, newPassword });
+    if (!parsed.ok) {
+      setPasswordErrors(parsed.errors);
+      return;
+    }
+    try {
+      await getApiClient().auth.changePassword(parsed.data);
+      setCurrentPassword('');
+      setNewPassword('');
+      setPasswordErrors({});
+      setNotice('Password updated. Other devices were signed out.');
+    } catch (cause) {
+      setPasswordErrors(toFormErrors(cause));
+    }
+  };
 
   const signOutEverywhere = async () => {
     try {
@@ -64,6 +86,25 @@ export default function SettingsScreen() {
             <Muted>{session.userAgent ?? 'Unknown device'}</Muted>
           </View>
         ))}
+      </Card>
+      <Card>
+        <Text style={{ color: colors.text, fontWeight: '700' }}>Password</Text>
+        {passwordErrors[FORM_ERROR] ? <Banner tone="danger" message={passwordErrors[FORM_ERROR]} /> : null}
+        <TextField
+          label="Current password"
+          value={currentPassword}
+          onChangeText={setCurrentPassword}
+          secureTextEntry
+          error={passwordErrors.currentPassword}
+        />
+        <TextField
+          label="New password"
+          value={newPassword}
+          onChangeText={setNewPassword}
+          secureTextEntry
+          error={passwordErrors.newPassword}
+        />
+        <Button label="Change password" onPress={() => void changePassword()} />
       </Card>
       <Button
         label="Sign out"

@@ -28,6 +28,7 @@ export function WorkList({
             <Muted>
               {work.authorName} · {work.subjectName}
               {work.review ? ` · Marked ${work.review.score}/100` : ''}
+              {` · ${work.engagement.likeCount} likes · ${work.engagement.commentCount} comments`}
             </Muted>
           </Card>
         </Pressable>

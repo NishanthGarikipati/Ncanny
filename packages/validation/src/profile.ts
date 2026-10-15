@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { avatarPresetSchema } from './auth';
 import {
   gradeSchema,
   objectIdSchema,
@@ -23,6 +24,7 @@ export const updateScholarProfileSchema = atLeastOneField(
     .object({
       fullName: z.string().trim().min(2).max(80),
       avatarUrl: urlSchema.nullable(),
+      avatarPreset: avatarPresetSchema,
       bio: bioSchema,
       grade: gradeSchema,
       section: z.string().trim().max(10),
@@ -38,6 +40,7 @@ export const updatePreceptorProfileSchema = atLeastOneField(
     .object({
       fullName: z.string().trim().min(2).max(80),
       avatarUrl: urlSchema.nullable(),
+      avatarPreset: avatarPresetSchema,
       bio: bioSchema,
       preceptorRole: z.string().trim().max(80),
       teachingSubjectIds: z.array(objectIdSchema).min(1).max(20),
